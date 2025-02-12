@@ -15,7 +15,7 @@ const App = () => {
         </nav>
 
         <Routes>
-          <Route path="/LandingPage" element={<LandingPage />} />
+          <Route path="/" element={<LandingPage />} />
         </Routes>
       </div>
     </Router>
