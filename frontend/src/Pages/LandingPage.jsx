@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "../index.css";
 import Achievements from "./Achievments";
 import HelpSection from "./HelpSection";
 import { PatientJourney } from "./PatientJourney";
@@ -66,7 +65,7 @@ const LandingPage = () => {
 
 
       {/* Hero Section */}
-      <div className="flex flex-col md:flex-row items-center justify-evenly text-center md:text-left py-20 px-6 w-screen bg-gradient-to-b from-[#bce1f1] to-white">
+      <div className="flex flex-col md:flex-row items-center justify-evenly text-center md:text-left py-40 px-6 w-screen bg-gradient-to-b from-[#bce1f1] to-white">
         {/* Left Side - Text */}
         <div className="md:w-1/2 ml-52 mr-[-50px] flex flex-col items-center md:items-start">
           <h1 className="text-5xl font-semibold text-gray-800 w-full">
@@ -96,9 +95,9 @@ const LandingPage = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-[400px]">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Report</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center   justify-center z-50">
+          <div className="bg-gray-200 p-6 rounded-lg border-2 border-teal-400 shadow-lg w-[400px]">
+            <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Scanned Blood Report</h2>
 
             {/* File Upload Input */}
             <input type="file" onChange={handleFileChange} className="mb-4 border p-2 w-full" />
@@ -107,13 +106,13 @@ const LandingPage = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleUpload}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+                className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600"
               >
                 Upload
               </button>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"              >
+                className="bg-gray-500 text-black px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"              >
                 Close
               </button>
             </div>
