@@ -31,11 +31,43 @@ const LandingPage = () => {
     if (error) {
       console.error("Upload failed:", error.message);
       alert("Upload failed. Try again.");
-    } else {
-      console.log("Upload successful:", data);
-      alert("File uploaded successfully!");
+      return;
+    }
+  
+    console.log("Upload successful:", data);
+  
+    // ✅ Correct File URL
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/usersrep/${data.path}`;
+    console.log("📌 File URL:", fileUrl);
+  
+    // 🔥 Send Data to Backend (MongoDB)
+    try {
+      const response = await fetch("http://localhost:5000/api/reports/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          patientName: "John Doe", // Replace with actual data
+          testType: "Blood Test", // Replace with actual data
+          supabaseUrl: fileUrl, // File URL from Supabase
+        }),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log("✅ Report Saved in MongoDB:", result);
+        alert("File uploaded and saved to database!");
+      } else {
+        console.error("❌ Failed to save report:", result.message);
+        alert("Failed to save report to database.");
+      }
+    } catch (error) {
+      console.error("❌ Error sending data to backend:", error);
+      alert("Error saving file data.");
     }
   };
+  
 
   
 
@@ -97,13 +129,14 @@ const LandingPage = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center   justify-center z-50">
           <div className="bg-gray-200 p-6 rounded-lg border-2 border-teal-400 shadow-lg w-[400px]">
+            
             <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Scanned Blood Report</h2>
 
             {/* File Upload Input */}
             <input type="file" onChange={handleFileChange} className="mb-4 border p-2 w-full" />
 
             {/* Buttons */}
-            <div className="flex justify-end space-x-3">
+            <div className="flex justify-between space-x-3">
               <button
                 onClick={handleUpload}
                 className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600"
@@ -115,7 +148,15 @@ const LandingPage = () => {
                 className="bg-gray-500 text-black px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"              >
                 Close
               </button>
+             
             </div>
+            <div>
+              <h2>Guide to upload the blood report</h2>
+              Don’t crop out any part of the image
+Avoid blurred image
+Supported files type: jpeg , jpg , png , pdf
+Maximum allowed file size: 2MB
+              </div>
           </div>
         </div>
       )}
