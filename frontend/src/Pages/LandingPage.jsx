@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import "../index.css";
 import Achievements from "./Achievments";
 import HelpSection from "./HelpSection";
+import { PatientJourney } from "./PatientJourney";
+import { supabase } from "./supabaseClient";
+
 
 const LandingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -10,15 +13,32 @@ const LandingPage = () => {
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
-
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedFile) {
       alert("Please select a file!");
       return;
     }
-    console.log("Uploading:", selectedFile.name);
-    // You can integrate the upload API here
+  
+    const fileExt = selectedFile.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`; // Unique filename
+  
+    const { data, error } = await supabase.storage
+      .from("usersrep")
+      .upload(fileName, selectedFile, {
+        cacheControl: "3600",
+        upsert: false,
+      });
+  
+    if (error) {
+      console.error("Upload failed:", error.message);
+      alert("Upload failed. Try again.");
+    } else {
+      console.log("Upload successful:", data);
+      alert("File uploaded successfully!");
+    }
   };
+
+  
 
   return (
     <>
@@ -28,7 +48,7 @@ const LandingPage = () => {
         <div className="text-2xl font-semibold text-gray-700">
           mediseek.<span className="text-gray-500">ai</span>
         </div>
-        <div className="hidden md:flex space-x-6 text-[#00d5be]">
+        <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#00d5be]">
           {["Home", "Enterprise", "Products", "About", "Blog", "Careers"].map((item) => (
             <li 
               key={item}
@@ -106,6 +126,7 @@ const LandingPage = () => {
     <Achievements />
     </div>
     <HelpSection/>
+    <PatientJourney/>
     </>
   );
 };
