@@ -44,26 +44,26 @@ const LandingPage = () => {
     <>
     <div className="w-screen min-h-screen">
       {/* Navbar */}
-      <nav className="w-full flex justify-between items-center px-8 py-4 shadow-md bg-[#edf8fc]">
-        <div className="text-2xl font-semibold text-gray-700">
-          mediseek.<span className="text-gray-500">ai</span>
-        </div>
-        <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#00d5be]">
-          {["Home", "Enterprise", "Products", "About", "Blog", "Careers"].map((item) => (
-            <li 
-              key={item}
-              href="#"
-              className="px-4 py-2  hover:border-2 rounded-xl border-gray-800 list-none "
-            >
-              {item}
-            </li>
-          ))}
-        </div>
+      <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-4 shadow-md bg-[#edf8fc] z-50">
+  <div className="text-2xl font-semibold text-gray-700">
+    mediseek.<span className="text-gray-500">ai</span>
+  </div>
+  <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#00d5be]">
+    {["Home", "Enterprise", "Products", "About", "Blog", "Careers"].map((item) => (
+      <li 
+        key={item}
+        href="#"
+        className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+      >
+        {item}
+      </li>
+    ))}
+  </div>
+  <button className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-500">
+    Free Trial
+  </button>
+</nav>
 
-        <button className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-500">
-          Free Trial
-        </button>
-      </nav>
 
       {/* Hero Section */}
       <div className="flex flex-col md:flex-row items-center justify-evenly text-center md:text-left py-20 px-6 w-screen bg-gradient-to-b from-[#bce1f1] to-white">
