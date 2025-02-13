@@ -8,6 +8,7 @@ import { supabase } from "./supabaseClient";
 const LandingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -17,6 +18,7 @@ const LandingPage = () => {
       alert("Please select a file!");
       return;
     }
+    setIsUploading(true); // Start Loader
   
     const fileExt = selectedFile.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`; // Unique filename
@@ -66,6 +68,7 @@ const LandingPage = () => {
       console.error("❌ Error sending data to backend:", error);
       alert("Error saving file data.");
     }
+    setIsUploading(false); // Stop Loader
   };
   
 
@@ -125,41 +128,58 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center   justify-center z-50">
-          <div className="bg-gray-200 p-6 rounded-lg border-2 border-teal-400 shadow-lg w-[400px]">
-            
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Scanned Blood Report</h2>
+     {/* Modal */}
+{isModalOpen && (
+  <div className="fixed inset-0  bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-gray-200 p-6 rounded-lg border-2 border-teal-400 shadow-lg w-[600px] relative">
+      
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Scanned Blood Report</h2>
 
-            {/* File Upload Input */}
-            <input type="file" onChange={handleFileChange} className="mb-4 border p-2 w-full" />
+      {/* File Upload Input */}
+      <input type="file" onChange={handleFileChange} className="mb-4 border p-2 w-full" disabled={isUploading} />
 
-            {/* Buttons */}
-            <div className="flex justify-between space-x-3">
-              <button
-                onClick={handleUpload}
-                className="bg-green-500 text-black px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Upload
-              </button>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="bg-gray-500 text-black px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"              >
-                Close
-              </button>
-             
-            </div>
-            <div>
-              <h2>Guide to upload the blood report</h2>
-              Don’t crop out any part of the image
-Avoid blurred image
-Supported files type: jpeg , jpg , png , pdf
-Maximum allowed file size: 2MB
-              </div>
-          </div>
+      {/* Show loader while uploading */}
+      {isUploading && (
+        <div className="flex justify-center items-center my-4">
+          <div className="w-6 h-6 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
+          <span className="ml-2 text-gray-700">Uploading...</span>
         </div>
       )}
+
+      {/* Buttons */}
+      <div className="flex justify-between space-x-3 mt-4">
+        <button
+          onClick={handleUpload}
+          className={`px-4 py-2 rounded-lg ${
+            isUploading ? "bg-gray-400 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+          } text-black`}
+          disabled={isUploading} // Disable during upload
+        >
+          {isUploading ? "Uploading..." : "Upload"}
+        </button>
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="bg-gray-500 text-black px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"
+          disabled={isUploading} // Prevent closing during upload
+        >
+          Close
+        </button>
+      </div>
+
+      {/* Guide Section */}
+      <div className="mt-6 p-4 bg-gray-100 rounded-lg border-l-4 border-teal-500 text-gray-700">
+        <h3 className="font-semibold text-lg">Guide to Upload Your Blood Report</h3>
+        <ul className="list-disc pl-5 text-sm mt-2">
+          <li>Do not crop out any part of the image.</li>
+          <li>Avoid blurred images.</li>
+          <li>Supported file types: <strong>JPEG, JPG, PNG, PDF</strong></li>
+          <li>Maximum allowed file size: <strong>2MB</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+)}
+
      
     </div>
     <div className="mt-[-70px]">
