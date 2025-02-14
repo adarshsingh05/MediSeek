@@ -2,6 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import LandingPage from './Pages/LandingPage';
+import Achievements from './Pages/Achievments';
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
 
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/achievements" element={<Achievements />} />
         </Routes>
       </div>
     </Router>
