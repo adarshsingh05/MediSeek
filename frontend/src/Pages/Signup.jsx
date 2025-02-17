@@ -167,7 +167,7 @@ const SignupModal = ({ isOpen, onClose }) => {
             </a>
           </p>
           {/* Show Login Component when isLoginOpen is true */}
-      {isLoginOpen && <Login />}
+      {isLoginOpen && <Login onClose={onClose}/>}
         </div>
       </div>
     </div>
