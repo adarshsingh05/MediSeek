@@ -44,6 +44,7 @@ const transporter = nodemailer.createTransport({
   }
 };
 
+
 // Verify Email
 const verifyEmail = async (req, res) => {
   try {
@@ -58,11 +59,13 @@ const verifyEmail = async (req, res) => {
 
     if (!user) return res.status(400).json({ message: "Invalid token" });
 
-    res.status(200).json({ message: "Email verified successfully" });
+    res.redirect("http://localhost:5173/Login");
+
   } catch (err) {
     res.status(400).json({ message: "Invalid or expired token" });
   }
 };
+
 
 // Login User
  const login = async (req, res) => {
@@ -77,17 +80,33 @@ const verifyEmail = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+    const token = jwt.sign({ id: user._id }, 'adarsh1234', { expiresIn: "1d" });
 
-    res.cookie("token", token, { httpOnly: true }).json({ message: "Login successful", token });
+    res.cookie("token", token, { httpOnly: true }).json({
+      message: "Login successful",
+      token,
+      username: User.name // Send the username as well
+    });  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+const logout = (req, res) => {
+  try {
+    // Clear the token cookie
+    res.clearCookie("token");
+
+    // Send a response indicating the user is logged out
+    res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Export all functions
 module.exports = {
     register,
     verifyEmail,
     login,
+    logout,
   };

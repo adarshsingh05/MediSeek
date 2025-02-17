@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const ClientsPage = () => {
+  const navigate = useNavigate();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrokerage, setSelectedBrokerage] = useState('All Brokerages');
 
@@ -58,20 +62,22 @@ const ClientsPage = () => {
   ];
 
   return (
-    <div className="w-full min-h-screen lg:px-[120px] px-[30px] lg:py-[50px] py-[20px] bg-slate-50">
+    <div className="w-full min-h-screen lg:px-[120px] px-[30px] lg:py-[50px] py-[20px] bg-slate-50 border-4 border-[#7ae2ef] rounded-4xl">
       
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="lg:text-2xl text-[18px] font-semibold text-gray-700">Clients</h1>
-          <p className="text-gray-500 lg:text-[18px] text-[12px]">List of your clients</p>
+          <h1 className="lg:text-2xl text-[18px] font-semibold text-gray-700">User Name</h1>
+          <p className="text-gray-500 lg:text-[18px] text-[12px]">View All of our Reports Here</p>
         </div>
         <div className="flex gap-4">
-          <button className="lg:text-[16px] text-[14px] bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-            Add Client
+          <button onClick={() => navigate('/')} className="lg:text-[16px] text-[14px] bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2">
+          ￩ Go Home
+          
+          
           </button>
           <button className="lg:text-[16px] text-[14px] bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2">
-            Add Brokerage
+            + New Report
           </button>
         </div>
       </div>
@@ -83,12 +89,13 @@ const ClientsPage = () => {
           <div className="relative">
             <input
               type="text"
+
               placeholder="Search"
               className="w-full bg-white px-4 py-2 border-[1px] border-zinc-300 text-black rounded-[20px] lg:text-[18px] text-[12px]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="absolute right-3 top-2.5">🔍</span>
+            <span className="absolute right-3 top-2.5"></span>
           </div>
         </div>
         <button className="lg:text-[16px] text-[14px] px-4 py-2 bg-emerald-500 text-white rounded-lg">Reset</button>
@@ -100,10 +107,10 @@ const ClientsPage = () => {
           <thead className="bg-slate-50 pb-[10px]">
             <tr>
               <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">ID</th>
-              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Broker</th>
+              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Report</th>
+              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Details</th>
               <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Location</th>
-              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Contact</th>
+              <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Lab</th>
               <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Date</th>
               <th className="px-6 py-3 text-left lg:text-[12px] text-[10px] font-medium text-gray-500 uppercase">Actions</th>
             </tr>
@@ -137,10 +144,9 @@ const ClientsPage = () => {
                 <td className="px-6 py-4 text-stone-600 lg:text-[14px] text-[12px] font-medium">{client.date}</td>
                 <td className="px-6 py-4">
                   <div className="flex gap-2">
-                    <button className="px-3 py-1 bg-emerald-100 text-emerald-800 lg:text-[14px] text-[12px] rounded">Tours</button>
-                    <button className="px-3 py-1 bg-blue-100 text-blue-800 lg:text-[14px] text-[12px] rounded">Order</button>
+                    <button className="px-3 py-1 bg-emerald-100 text-emerald-800 lg:text-[14px] text-[12px] rounded">Analyze</button>
+                    <button className="px-3 py-1 bg-blue-100 text-blue-800 lg:text-[14px] text-[12px] rounded">Download</button>
                     <button className="text-red-500">✕</button>
-                    <button className="text-gray-400">⋮</button>
                   </div>
                 </td>
               </tr>

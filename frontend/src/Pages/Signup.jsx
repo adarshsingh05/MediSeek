@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 const SignupModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -11,6 +12,7 @@ const SignupModal = ({ isOpen, onClose }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSuccess, setShowSuccess] = useState(false); // For success popup
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,9 +35,14 @@ const SignupModal = ({ isOpen, onClose }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Signup failed");
 
-      alert("Signup successful! Please verify your email.");
+      setShowSuccess(true); // Show success popup
       setFormData({ name: "", email: "", password: "" });
-      onClose(); // Close modal after successful signup
+
+      // Automatically close modal after 3 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+        onClose();
+      }, 3000);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -46,11 +53,11 @@ const SignupModal = ({ isOpen, onClose }) => {
   return (
     <div
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50"
-      onClick={onClose} // Close modal when clicking outside
+      onClick={onClose}
     >
       <div
-        className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden"
-        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+        className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden relative"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Left Section (Illustration) */}
         <div className="hidden md:flex w-1/2 bg-[#D9F0F1] items-center justify-center relative">
@@ -141,28 +148,44 @@ const SignupModal = ({ isOpen, onClose }) => {
 
             {/* Signup Button with Loader */}
             <button
-  type="submit"
-  disabled={loading}
-  className="bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2 w-full"
->
-  {loading ? (
-    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-  ) : (
-    "Create Account"
-  )}
-</button>
-
+              type="submit"
+              disabled={loading}
+              className="bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition flex items-center justify-center gap-2 w-full"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                "Create Account"
+              )}
+            </button>
           </form>
 
           {/* Login Redirect */}
           <p className="text-black mt-4">
             Already have an account?{" "}
-            <a href="#" className="text-blue-500 hover:underline">
+            <a href="/login" className="text-blue-500 hover:underline">
               Login
             </a>
           </p>
         </div>
       </div>
+
+      {/* Success Popup */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm">
+            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
+            <h2 className="text-lg font-semibold text-gray-800 mt-4">Signup Successful!</h2>
+            <p className="text-gray-600 mt-2">Please verify your email to continue.</p>
+            <button
+              onClick={() => setShowSuccess(false)}
+              className="mt-4 bg-green-500 text-white py-2 px-6 rounded-lg hover:bg-green-600 transition"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

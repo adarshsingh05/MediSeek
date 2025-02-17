@@ -7,7 +7,16 @@ const authRoutes = require('./routes/authRoutes'); // Ensure this is correctly i
 const app = express();
 connectDB();
 
-app.use(cors());
+
+
+// ✅ Fix CORS Issues
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow requests from frontend
+    credentials: true, // Allow cookies and authentication headers
+  })
+);
+
 app.use(bodyParser.json());
 
 // ✅ Correct way to use routes
