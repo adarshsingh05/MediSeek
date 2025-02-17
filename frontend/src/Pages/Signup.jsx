@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Login from "./login";
 
 const SignupModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -11,6 +12,7 @@ const SignupModal = ({ isOpen, onClose }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -157,10 +159,15 @@ const SignupModal = ({ isOpen, onClose }) => {
           {/* Login Redirect */}
           <p className="text-black mt-4">
             Already have an account?{" "}
-            <a href="#" className="text-blue-500 hover:underline">
+            <a href="#" className="text-blue-500 hover:underline" onClick={(e) => {
+    e.preventDefault(); 
+    setIsLoginOpen(true); // Open login modal
+  }}>
               Login
             </a>
           </p>
+          {/* Show Login Component when isLoginOpen is true */}
+      {isLoginOpen && <Login onClose={onClose}/>}
         </div>
       </div>
     </div>
