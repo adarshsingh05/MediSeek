@@ -18,11 +18,16 @@ const Login = () => {
         password,
       }, { withCredentials: true });
 
-      if (response.data.token) {
-        console.log(response.data);
+      // Ensure the backend sends both token and username
+      if (response.data.token && response.data.username) {
+        // Store the token and username in localStorage
         localStorage.setItem("authToken", response.data.token);
-        localStorage.setItem("username", response.data.username);  // Assuming username is in response.data.username
-        navigate("/"); // Redirect to Dashboard after login
+        localStorage.setItem("username", response.data.username);
+        
+        // Redirect to Dashboard after login
+        navigate("/");
+      } else {
+        setError("Missing token or username in response");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");

@@ -4,8 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import LandingPage from './Pages/LandingPage';
 import Achievements from './Pages/Achievments';
 import History from "./Pages/History";
-import { LogIn } from 'lucide-react';
-import LoginPage from './Pages/Login';
+import Login from './Pages/Login';
 
 const App = () => {
   return (
@@ -22,7 +21,7 @@ const App = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/history" element={<History/>}></Route>
-          <Route path="/login" element={<LoginPage/>}></Route>
+          <Route path="/login" element={<Login/>}></Route>
         </Routes>
       </div>
     </Router>
