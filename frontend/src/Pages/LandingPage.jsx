@@ -3,12 +3,15 @@ import Achievements from "./Achievments";
 import HelpSection from "./HelpSection";
 import { PatientJourney } from "./PatientJourney";
 import { supabase } from "./supabaseClient";
+import SignupModal from "./Signup";
+import { Link } from 'react-router-dom';
 
 
 const LandingPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
 
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
@@ -82,20 +85,31 @@ const LandingPage = () => {
   <div className="text-2xl font-semibold text-gray-700">
     mediseek.<span className="text-gray-500">ai</span>
   </div>
-  <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#00d5be]">
-    {["Home", "Your Reports", "Dashboard", "About", "Features"].map((item) => (
-      <li 
-        key={item}
-        href="#"
-        className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+  <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
+  {["Home", "Your Reports", "Dashboard", "About", "Features"].map((item) => (
+    <li 
+      key={item}
+      className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+    >
+      {item === "Your Reports" ? (
+        <Link to="/History" className="text-[#434545]">
+          {item}
+        </Link>
+      ) : (
+        item
+      )}
+    </li>
+  ))}
+</div>
+  <button
+        onClick={() => setIsSignupOpen(true)}
+        className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-500"
       >
-        {item}
-      </li>
-    ))}
-  </div>
-  <button className="bg-teal-400 text-black px-4 py-2 rounded-lg hover:bg-teal-500">
-    Get In ⮞
-  </button>
+        Get In ⮞
+      </button>
+
+      {/* Signup Modal (Controlled by isSignupOpen) */}
+      <SignupModal isOpen={isSignupOpen} onClose={() => setIsSignupOpen(false)} />
 </nav>
 
 
@@ -115,7 +129,7 @@ const LandingPage = () => {
           <div >
           <button
             onClick={() => setIsModalOpen(true)}
-            className="mt-6 px-6 rounded-lg text-lg bg-indigo-700"
+            className="mt-6 px-6 h-12 cursor-pointer rounded-lg text-lg bg-indigo-700"
           >
             Scan Your Report ⮞
           </button>
