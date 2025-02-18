@@ -5,6 +5,7 @@ import LandingPage from './Pages/LandingPage';
 import Achievements from './Pages/Achievments';
 import History from "./Pages/History";
 import Login from './Pages/Login';
+import Dashboard from './Pages/Dashboard';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
           <Route path="/achievementsachievements" element={<Achievements />} />
           <Route path="/history" element={<History/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
+          <Route path="/dashboard" element={<Dashboard/>}></Route>
         </Routes>
       </div>
     </Router>
