@@ -27,61 +27,73 @@ const LandingPage = () => {
   };
   const handleUpload = async () => {
     if (!selectedFile) {
-      alert("Please select a file!");
-      return;
+        alert("Please select a file!");
+        return;
     }
     setIsUploading(true); // Start Loader
-  
+
     const fileExt = selectedFile.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`; // Unique filename
-  
+
     const { data, error } = await supabase.storage
-      .from("usersrep")
-      .upload(fileName, selectedFile, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-  
+        .from("usersrep")
+        .upload(fileName, selectedFile, {
+            cacheControl: "3600",
+            upsert: false,
+        });
+
     if (error) {
-      console.error("Upload failed:", error.message);
-      alert("Upload failed. Try again.");
-      return;
+        console.error("Upload failed:", error.message);
+        alert("Upload failed. Try again.");
+        setIsUploading(false);
+        return;
     }
-  
+
     console.log("Upload successful:", data);
-  
+
     // ✅ Correct File URL
     const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/usersrep/${data.path}`;
     console.log("📌 File URL:", fileUrl);
-  
+
     // 🔥 Send Data to Backend (MongoDB)
     try {
-      const response = await fetch("http://localhost:5000/api/reports/upload", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          patientName: "John Doe", // Replace with actual data
-          testType: "Blood Test", // Replace with actual data
-          supabaseUrl: fileUrl, // File URL from Supabase
-        }),
-      });
-  
-      const result = await response.json();
-      if (response.ok) {
-        console.log("✅ Report Saved in MongoDB:", result);
-        alert("File uploaded and saved to database!");
-      } else {
-        console.error("❌ Failed to save report:", result.message);
-        alert("Failed to save report to database.");
-      }
+        const token = localStorage.getItem("authToken"); // Get stored token
+
+        if (!token) {
+            alert("Authentication error: Please log in again.");
+            setIsUploading(false);
+            return;
+        }
+
+        const response = await fetch("http://localhost:5000/api/reports/upload", {
+            method: "POST",
+            headers: {
+              'Authorization': `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                patientName: "John Doe", // Replace with actual data
+                testType: "Blood Test", // Replace with actual data
+                supabaseUrl: fileUrl, // File URL from Supabase
+            }),
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log("✅ Report Saved in MongoDB:", result);
+            alert("File uploaded and saved to database!");
+        } else {
+            console.error("❌ Failed to save report:", result.message);
+            alert("Failed to save report to database.");
+        }
     } catch (error) {
-      console.error("❌ Error sending data to backend:", error);
-      alert("Error saving file data.");
+        console.error("❌ Error sending data to backend:", error);
+        alert("Error saving file data.");
     }
+
     setIsUploading(false); // Stop Loader
-  };
+};
+
   const handleLogout = async () => {
     try {
       // Send a request to the backend to log out

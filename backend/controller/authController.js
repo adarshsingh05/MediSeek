@@ -12,6 +12,23 @@ const transporter = nodemailer.createTransport({
     pass: 'dwvrctqdmapxxgcy ',
   },
 });
+const authMiddleware = async (req, res, next) => {
+  try {
+    const authHeader = req.header("Authorization");
+    console.log("Authorization Header:", authHeader); // Log the header to check if token is passed
+    if (!authHeader) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const token = authHeader.replace("Bearer ", "");
+    const decoded = jwt.verify(token, 'adarsh1234');
+    console.log("Decoded Token:", decoded); // Log the decoded token to ensure it's valid
+
+    req.user = { id: decoded.id }; // Attach user ID
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
+
 
 // Register User
  const register = async (req, res) => {
@@ -109,4 +126,5 @@ module.exports = {
     verifyEmail,
     login,
     logout,
+    authMiddleware,
   };
