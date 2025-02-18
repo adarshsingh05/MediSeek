@@ -1,13 +1,16 @@
 const express = require('express');
 const PDFDocument = require('pdfkit');
-const path = require('path');
+
 const Report = require('../models/Report');
 const { authMiddleware } = require("../controller/authController");
 const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const Tesseract = require('tesseract.js');
-
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const fs = require("fs");   
 const router = express.Router();
+const {marked} = require('marked'); // <--- Here, at the top level
+const pdf = require('html-pdf');
 
 // 📌 API to Save Report Metadata in MongoDB
 router.post('/upload',authMiddleware, async (req, res) => {
@@ -39,6 +42,103 @@ router.post('/upload',authMiddleware, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+const genAI = new GoogleGenerativeAI('AIzaSyBkojcV2Zky8zAJk9k1zGVrtodmIU8Jc4k');
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+
+router.post('/process-report', async (req, res) => {
+    const { extractedData} = req.body;
+     structureCommand= 'Hey kindly struture this entire rport in more readable form in way of rows and coloumns also include the patient name,laboratory information and structure according to the indian lab standards on the top add Electronic Health Report Powered by meediseek.ai in Bold and large font center this text in the middle keep all the details given in the text in report in the proper way';
+    
+    const prompt = `
+      You are an AI assistant that formats blood report data. 
+      Here is the extracted data:
+      ${extractedData}
+      Please structure the data into a table with the following format: ${structureCommand}.
+      Return only the structured data in a table. Do not include any explanatory text.
+    `;
+  
+    try {
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      });
+  
+      const structuredData = result.response.candidates[0].content.parts[0].text;
+  
+      if (true) {
+        const pdfFilePath = await generatePDF(structuredData);
+  
+        if (pdfFilePath) {
+          res.download(pdfFilePath, 'structured-report.pdf', (err) => {
+            if (err) {
+              console.error("Error downloading PDF:", err);
+              res.status(500).send('Error downloading PDF');
+            } else {
+              console.log("PDF sent successfully.");
+            }
+          });
+        } else {
+          res.status(500).send("Error generating PDF");
+        }
+      } else {
+        res.json({ structuredData });
+      }
+  
+    } catch (error) {
+      console.error('Error formatting health report:', error);
+      res.status(500).send('Failed to process health report');
+    }
+  });
+  
+  async function generatePDF(structuredData) {
+    return new Promise((resolve, reject) => {
+      const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+  <style>
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word; /* Important for long text */
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  br {
+    display: block;
+    margin-bottom: 5px;
+  }
+  </style>
+  </head>
+  <body>
+  
+  ${marked(structuredData)}
+  
+  </body>
+  </html>`;
+  
+      const pdfFilePath = './output/structured-report.pdf';
+  
+      fs.mkdirSync('./output', { recursive: true }); // Create if doesn't exist
+  
+      pdf.create(html, { format: 'Letter' }).toFile(pdfFilePath, function (err, res) {
+        if (err) {
+          console.error("Error creating PDF:", err);
+          reject(null); // Indicate error
+        } else {
+          console.log(res);
+          resolve(pdfFilePath);
+        }
+      });
+    });
+  }
+  
 router.get('/extract/:reportId', authMiddleware, async (req, res) => {
     try {
         const userId = req.user.id; // Get logged-in user ID
@@ -98,64 +198,9 @@ router.get('/extract/:reportId', authMiddleware, async (req, res) => {
             res.status(500).json({ message: "Failed to extract report data and generate PDF" });
         }
     }
-});
-router.get('/extsract/:reportId', authMiddleware, async (req, res) => {
-    try {
-        const userId = req.user.id; // Get logged-in user ID
-        const report = await Report.findOne({ _id: req.params.reportId, userId }); // Ensure only owner's report is fetched
-        
-        if (!report) return res.status(404).json({ message: "Report not found or access denied" });
+});// Endpoint to process the extracted report
 
-        const fileUrl = report.supabaseUrl;
-        console.log("🔍 Fetching File from:", fileUrl);
 
-        const response = await axios.get(fileUrl, { responseType: "arraybuffer" });
-        const fileBuffer = Buffer.from(response.data);
-
-        let extractedText = "";
-
-        if (fileUrl.endsWith(".pdf")) {
-            const pdfData = await pdfParse(fileBuffer);
-            extractedText = pdfData.text;
-        } else if (fileUrl.endsWith(".jpg") || fileUrl.endsWith(".png")) {
-            const { data } = await Tesseract.recognize(fileBuffer, "eng");
-            extractedText = data.text;
-        } else {
-            return res.status(400).json({ message: "Unsupported file format" });
-        }
-
-        console.log("📄 Extracted Data:", extractedText);
-        res.json({ reportId: report._id, text: extractedText });
-         // Create a PDF from the extracted text
-         const doc = new PDFDocument();
-        
-         // Set the response header to download the PDF file
-         res.setHeader('Content-Type', 'application/pdf');
-         res.setHeader('Content-Disposition', 'attachment; filename=health_report.pdf');
- 
-         // Pipe the PDF document to the response
-         doc.pipe(res);
- 
-         // Add content to the PDF
-         doc.fontSize(18).text('Electronic Health Report', { align: 'center' });
-         doc.moveDown();
- 
-         doc.fontSize(12).text(`Patient Name: ${report.patientName}`);
-         doc.text(`Test Type: ${report.testType}`);
-         doc.text(`Date: ${new Date(report.date).toLocaleDateString()}`);
-         doc.moveDown();
- 
-         // Add the extracted data (the report content)
-         doc.fontSize(10).text(`Extracted Report Data:\n${extractedText}`);
- 
-         // Finalize the PDF document
-         doc.end();
-
-    } catch (error) {
-        console.error("❌ Extraction Error:", error.message);
-        res.status(500).json({ message: "Failed to extract report data" });
-    }
-});
 
 
 

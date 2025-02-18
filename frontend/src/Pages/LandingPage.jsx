@@ -13,6 +13,8 @@ const LandingPage = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [userName, setUserName] = useState(null); // State to store user's name
+  const [patientName, setPatientName] = useState(""); // New state for patient name
+  const [testReport, setTestReport] = useState(""); // New state for test report
 
   useEffect(() => {
     // Fetch user name from localStorage or any other global state if logged in
@@ -25,9 +27,10 @@ const LandingPage = () => {
   const handleFileChange = (e) => {
     setSelectedFile(e.target.files[0]);
   };
+
   const handleUpload = async () => {
-    if (!selectedFile) {
-        alert("Please select a file!");
+    if (!selectedFile || !patientName || !testReport) {
+        alert("Please fill all fields and select a file!");
         return;
     }
     setIsUploading(true); // Start Loader
@@ -72,8 +75,8 @@ const LandingPage = () => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                patientName: "John Doe", // Replace with actual data
-                testType: "Blood Test", // Replace with actual data
+                patientName: patientName, // Send patient name from the input field
+                testType: testReport, // Send test report value
                 supabaseUrl: fileUrl, // File URL from Supabase
             }),
         });
@@ -109,6 +112,7 @@ const LandingPage = () => {
       console.error("Logout failed:", err);
     }
   };
+
   return (
     <>
       <div className="w-screen min-h-screen">
@@ -120,17 +124,22 @@ const LandingPage = () => {
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
             {["Home", "Your Reports", "Dashboard", "About", "Features"].map((item) => (
               <li
-                key={item}
-                className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
-              >
-                {item === "Your Reports" ? (
-                  <Link to="/History" className="text-[#434545]">
-                    {item}
-                  </Link>
-                ) : (
-                  item
-                )}
-              </li>
+              key={item}
+              className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+            >
+              {item === "Your Reports" ? (
+                <Link to="/History" className="text-[#434545]">
+                  {item}
+                </Link>
+              ) : item === "Home" ? (
+                <Link to="/" className="text-[#434545]">
+                  {item}
+                </Link>
+              ) : (
+                item
+              )}
+            </li>
+            
             ))}
           </div>
           {/* If user is logged in, show first letter of username */}
@@ -186,9 +195,29 @@ const LandingPage = () => {
           <div className="fixed inset-0  bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-gray-200 p-6 rounded-lg border-2 border-teal-400 shadow-lg w-[600px] relative">
               <h2 className="text-xl font-semibold text-gray-700 mb-4">Upload Your Scanned Blood Report</h2>
-
+              <input 
+                type="text" 
+                placeholder="Enter Patient Name" 
+                className="mb-4 border p-2 w-full text-black rounded-2xl" 
+                disabled={isUploading} 
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)} 
+              />
+              <input 
+                type="text" 
+                placeholder="Enter Test Report" 
+                className="mb-4 border p-2 w-full text-black rounded-2xl" 
+                disabled={isUploading} 
+                value={testReport}
+                onChange={(e) => setTestReport(e.target.value)} 
+              />
               {/* File Upload Input */}
-              <input type="file" onChange={handleFileChange} className="mb-4 border p-2 w-full" disabled={isUploading} />
+              <input 
+                type="file" 
+                onChange={handleFileChange} 
+                className="mb-4 border p-2 w-full text-black rounded-2xl" 
+                disabled={isUploading} 
+              />
 
               {/* Show loader while uploading */}
               {isUploading && (
