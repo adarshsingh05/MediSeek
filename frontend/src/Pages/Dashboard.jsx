@@ -15,7 +15,7 @@ export default function Dashboard() {
       <aside className="w-64 p-5 bg-[#112b5e] flex flex-col fixed h-full rounded-2xl m-2 mb-2">
         <div className="flex flex-row p-2">
         <img className="h-7 w-6 ml-2 mr-3" src="/docl.png"></img>
-        <h1 className="text-xl font-bold">medicus.ai</h1>
+        <h1 className="text-xl font-bold font-mono">medicus.ai</h1>
         
         </div>
         <div className="h-[1px] w-[212px] bg-gray-200 rounded-4xl" ></div>
@@ -92,14 +92,44 @@ export default function Dashboard() {
         </section>
       </main>
       
-      {/* Right Sidebar */}
-      <aside className="w-72 p-5 bg-[#112b5e] fixed right-0 h-full mr-3 mt-2 mb-2 rounded-2xl">
-        <div className="text-center">
-          <h3>Charles Robbie</h3>
-          <p>25 years old | New York, USA</p>
-          <p>Blood: O+ | Height: 186cm | Weight: 90kg</p>
-        </div>
-      </aside>
+      <aside class="w-72 p-5 bg-[#112b5e] fixed right-0 h-full mr-3 mt-2 mb-2 rounded-2xl text-white">
+        <p className="text-2xl text-center font-mono font-bold mb-2">User's Info</p>
+        <div className="h-[1px] w-[250px] bg-gray-200 mb-4"></div>
+  <div class="text-center mb-4">
+   <img src="Avatar.svg" className="rounded-full mx-auto mb-2 ml-[80px] h-[100px] w-[100px]"></img>
+    <h3 class="text-xl font-semibold">Charles Robbie</h3>
+    <p className="flex flex-row">25 years old | <img className="mr-[3px] ml-[1px] mt-[4px] h-4 w-4" src="lp.svg"></img> New York, USA</p>
+  </div>
+  <div class="bg-[#1d3b6e] p-4 rounded-xl mb-4">
+    <div class="grid grid-cols-3 text-center">
+      <div>
+        <p class="text-sm">Blood</p>
+        <p class="font-bold">O+</p>
+      </div>
+      <div>
+        <p class="text-sm">Height</p>
+        <p class="font-bold">186cm</p>
+      </div>
+      <div>
+        <p class="text-sm">Weight</p>
+        <p class="font-bold">90kg</p>
+      </div>
+    </div>
+  </div>
+  <h4 class="text-lg font-semibold mb-2">Upcoming</h4>
+  <div class="bg-[#1d3b6e] p-4 rounded-xl mb-4">
+    <p class="text-sm">Health appointment</p>
+    <p class="text-xs">Mr Dok tomm</p>
+    <p class="text-xs">09:20AM - 11:30</p>
+  </div>
+  <div class="bg-[#1d3b6e] p-4 rounded-xl">
+    <p class="text-sm">Meeting with Tok Dalang</p>
+    <p class="text-xs text-red-400">Due Soon</p>
+    <p class="text-xs">07:00AM</p>
+  </div>
+</aside>
+
+      
     </div>
   );
 }
