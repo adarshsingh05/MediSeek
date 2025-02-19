@@ -7,14 +7,58 @@ export default function DashboardUI() {
   const [userName, setUserName] = useState(null);
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false); // New loading state
+  const [loadingt, setLoadingt] = useState(false); // New loading state
   const [copied, setCopied] = useState(false); // State to track if the report ID is copied
   // download EHR
+  const [summary, setSummary] = useState("");
 
   const [reportId, setReportId] = useState("");
+  const [reportId2, setReportId2] = useState("");
   const navigate = useNavigate(); // Assuming you're using React Router
+  const handleSubmit = async () => {
+    if (!reportId2) return alert("Please enter a Report ID!");
 
-  // Function to handle the download
-  
+    setLoadingt(true);
+    setSummary("");
+
+    try {
+      // Get the token from local storage (or however you're storing it)
+      const authToken = localStorage.getItem("authToken");
+      if (!authToken) throw new Error("No authentication token found.");
+
+      // Step 1: Extract the data from the report ID with Authorization header
+      const extractResponse = await axios.get(
+        `http://localhost:5000/api/reports/extract/${reportId2}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Include the token here
+          },
+        }
+      );
+
+      const extractedData = extractResponse.data.extractedData;
+
+      // Step 2: Generate the summary using the extracted data
+      const summaryResponse = await axios.post(
+        "http://localhost:5000/api/reports/generate-summary",
+        { extractedData },
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Include the token here as well
+          },
+        }
+      );
+
+      // Set the summary to display
+      setSummary(summaryResponse.data.summary);
+    } catch (error) {
+      console.error("Error fetching the report summary:", error);
+      setSummary("Failed to retrieve report summary. Please try again later.");
+    }
+
+    setLoadingt(false);
+  };
+
   const handleDownloadEHR = async () => {
     if (!reportId) {
       alert("Please enter a report ID!");
@@ -54,7 +98,6 @@ export default function DashboardUI() {
             responseType: "blob", // Expecting a PDF as a blob
           }
         );
-        
 
         // Create a link element to download the PDF
         const url = window.URL.createObjectURL(
@@ -66,7 +109,6 @@ export default function DashboardUI() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
       } else {
         console.error("No extracted data found in response.");
         alert("Failed to extract report data.");
@@ -97,7 +139,6 @@ export default function DashboardUI() {
         );
         console.log(data);
         setReports(data);
-        
       } catch (error) {
         console.error("Error fetching reports:", error.message);
       }
@@ -105,7 +146,7 @@ export default function DashboardUI() {
 
     fetchReports();
   }, []);
-  
+
   useEffect(() => {
     const storedUserName = localStorage.getItem("username");
     if (storedUserName) {
@@ -206,13 +247,16 @@ export default function DashboardUI() {
     };
   };
   const handleCopyClick = (reportId) => {
-    navigator.clipboard.writeText(reportId).then(() => {
-      console.log(reportId);
-      setCopied(true);
-      alert("Report ID copied to clipboard!");
-    }).catch((error) => {
-      console.error("Failed to copy text: ", error);
-    });
+    navigator.clipboard
+      .writeText(reportId)
+      .then(() => {
+        console.log(reportId);
+        setCopied(true);
+        alert("Report ID copied to clipboard!");
+      })
+      .catch((error) => {
+        console.error("Failed to copy text: ", error);
+      });
   };
 
   return (
@@ -254,29 +298,34 @@ export default function DashboardUI() {
                 key={report._id}
                 className="grid grid-cols-6 gap-4 items-center mb-2 text-gray-200 hover:text-black bg-black py-2 hover:bg-gray-100 transition-all duration-200 rounded-lg p-2"
               >
- <div className="ml-2 flex items-center"> {/* Added flex for alignment */}
-      <div>{report._id.slice(0,9)}</div> {/* Display the full ID */}
-      <button
-    onClick={() => handleCopyClick(report._id)}
-    className="ml-2 text-gray-500 hover:text-blue-500 focus:outline-none"
-  >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-5.172 1.913a2 2 0 00-1.414 1.414v10.342a2 2 0 001.414 1.414l2.121 2.121a2 2 0 002.828 0l2.121-2.121a2 2 0 001.414-1.414V8.328a2 2 0 00-1.414-1.414l-2.121-2.121a2 2 0 00-2.828 0L9.172 6.913z"
-          />
-        </svg>
-      </button>
-      {copied && <span className="ml-2 text-green-500"></span>} {/* Confirmation message */}
-    </div>                <div>{report.patientName}</div>
+                <div className="ml-2 flex items-center">
+                  {" "}
+                  {/* Added flex for alignment */}
+                  <div>{report._id.slice(0, 9)}</div>{" "}
+                  {/* Display the full ID */}
+                  <button
+                    onClick={() => handleCopyClick(report._id)}
+                    className="ml-2 text-gray-500 hover:text-blue-500 focus:outline-none"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2m-5.172 1.913a2 2 0 00-1.414 1.414v10.342a2 2 0 001.414 1.414l2.121 2.121a2 2 0 002.828 0l2.121-2.121a2 2 0 001.414-1.414V8.328a2 2 0 00-1.414-1.414l-2.121-2.121a2 2 0 00-2.828 0L9.172 6.913z"
+                      />
+                    </svg>
+                  </button>
+                  {copied && <span className="ml-2 text-green-500"></span>}{" "}
+                  {/* Confirmation message */}
+                </div>{" "}
+                <div>{report.patientName}</div>
                 <div>{report.testType}</div>
                 <div>{report.date.slice(0, 10) || "N/A"}</div>
                 <div
@@ -311,7 +360,7 @@ export default function DashboardUI() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-3 gap-4">
-      <div className="bg-[#112b5e] p-4 rounded-lg flex flex-col items-center">
+        <div className="bg-[#112b5e] p-4 rounded-lg flex flex-col items-center">
           <h3 className="text-xl font-bold">Download Your EHR Here</h3>
           <input
             type="text"
@@ -330,43 +379,57 @@ export default function DashboardUI() {
 
         {/* Loader */}
         {loading && (
-  <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
-    {/* Background blur for the rest of the content */}
-    <div className="absolute top-0 left-0 w-full h-full backdrop-blur-md"></div>
+          <div className="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center z-50">
+            {/* Background blur for the rest of the content */}
+            <div className="absolute top-0 left-0 w-full h-full backdrop-blur-md"></div>
+
+            {/* Loader content */}
+            <div className="flex flex-col items-center z-10">
+              <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 border-t-4 border-blue-500 rounded-full"></div>
+              <p className="mt-4 text-white text-lg">Downloading...</p>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-[#112b5e]/50 backdrop-blur-lg p-4 h-[200px] rounded-lg flex flex-col items-center w-[600px] shadow-md shadow-[#00b6c7] overflow-y-auto">
+          {" "}
+          <div className="flex flex-row justify-between items-center w-full">
+  <h3 className="text-xl font-bold">
+    Report Review In Layman Terms
+  </h3>
+  <button 
+    onClick={handleReadAloud} 
+    className="ml-3 bg-blue-500 text-white px-2 py-1 rounded-lg hover:bg-blue-600 transition duration-300 cursor-pointer"
     
-    {/* Loader content */}
-    <div className="flex flex-col items-center z-10">
-      <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 border-t-4 border-blue-500 rounded-full"></div>
-      <p className="mt-4 text-white text-lg">Downloading...</p>
-    </div>
-  </div>
-)}
+  >
+    <img src="file.png" className="h-5 w-5"></img>
+    
+  </button>
+</div>
 
-
-     
-        <div className="bg-[#112b5e]/50 backdrop-blur-lg p-4 rounded-lg flex flex-col items-center w-[600px] shadow-md shadow-[#00b6c7]">
           <div className="flex flex-row ">
-            <h3 className="text-xl font-bold flex flex-row justify-around ">
-              Report Review In Leyman Terms
-            </h3>{" "}
+            <input
+              type="text"
+              value={reportId2}
+              onChange={(e) => setReportId2(e.target.value)}
+              placeholder="Enter Report ID"
+              className="mt-2 p-2 border rounded ml-[-220px]"
+            />
+
             <button
-              onClick={handleReadAloud}
-              className="ml-48 flex flex-row py-[2px] cursor-pointer  rounded-md px-[6px] bg-[#0a1a3c] "
+              onClick={handleSubmit}
+              className="mt-2 px-1 ml-6 bg-teal-500 text-white rounded-lg hover:bg-teal-600 cursor-pointer"
+              disabled={loadingt}
             >
-              <img src="file.png" className="h-6 w-6 mr-[5px] invert"></img>
+              {loadingt ? "Loading..." : "Submit"}
             </button>
           </div>
           <p id="report-text" className="mt-2">
-            Rakta pariksha nivethika pramukhytha: Rakta pariksha nivethika mana
-            aroghya paristhithi ni ardam chesukovadanki ento upayogakaranga
-            untundi. Rakthamlo glucose, hemoglobin, cholesterol sthalilanu idi
-            theliyajesthundi. Anarogya lakshanalu mundhugaane gurthinchi, tagina
-            vaidya charyalu theesukovataniki rakta pariksha avasaram. Aroghya
-            samrakshanalo idi keelaka paatra vahistundi.
+            {summary ||
+              "Kindly put your Report ID to get the summary of your report in Layman and easy-to-understand terms with the help of AI. You will also be getting a read-aloud feature for a smoother experience. Powered by meediseek.ai"}
           </p>
         </div>
-        </div>
-      
+      </div>
 
       {/* Fitness Activity Chart Placeholder */}
       <div className="bg-[#112b5e] p-6 rounded-lg mt-6">

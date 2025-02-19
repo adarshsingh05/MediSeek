@@ -138,6 +138,37 @@ router.post('/process-report', async (req, res) => {
       });
     });
   }
+  router.post('/generate-summary', async (req, res) => {
+    const { extractedData } = req.body;
+
+    const summaryCommand = `Please provide a 15 to 20 line summary of the following blood report data in simple language that anyone can understand. 
+    Highlight important points like abnormalities, key health indicators, and any actionable insights, but avoid medical jargon. 
+    Keep the tone friendly and informative. Give me the response in plain text without any star symbols or anything ready to paste and use kind of remember do not
+    include any star symbol and or anything in the text and write the summary in a way that it is easy to understand for a layman also when you give response start with summary powered by 
+    meediseek ai and then write in text format entire summary remove any special symbol or asterick symbol from the response.`;
+
+    const prompt = `
+      You are an AI assistant tasked with summarizing blood report data.
+      Here is the extracted data:
+      ${extractedData}
+      ${summaryCommand}
+      Return only the summary, without any extra explanations or headers.
+    `;
+
+    try {
+        const result = await model.generateContent({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+        });
+
+        const summary = result.response.candidates[0].content.parts[0].text;
+
+        res.json({ summary });
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        res.status(500).send('Failed to generate summary');
+    }
+});
+
   
 router.get('/extract/:reportId', authMiddleware, async (req, res) => {
     try {
