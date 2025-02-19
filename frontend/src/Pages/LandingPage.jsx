@@ -135,7 +135,11 @@ const LandingPage = () => {
                 <Link to="/" className="text-[#434545]">
                   {item}
                 </Link>
-              ) : (
+              ) : item === 'Dashboard' ? (
+                <Link to="/dashboard" className="text-[#434545]">
+                  {item}
+                </Link>
+              ):(
                 item
               )}
             </li>

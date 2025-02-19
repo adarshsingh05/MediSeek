@@ -163,6 +163,7 @@ router.get('/extract/:reportId', authMiddleware, async (req, res) => {
         } else {
             return res.status(400).json({ message: "Unsupported file format" });
         }
+        res.status(200).json({ extractedData: extractedText });
 
         console.log("📄 Extracted Data:", extractedText);
 

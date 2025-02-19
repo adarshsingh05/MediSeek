@@ -1,13 +1,42 @@
 import { useState } from "react";
 import DashboardUI from "./dsectionone";
+import { useEffect } from "react";
+import axios from "axios";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
+      const [userName, setUserName] = useState(null);
+      const [reportname, setReportName] = useState(null);
+  
 
   const handleNavigation = (section) => {
     setActiveSection(section);
     document.getElementById(section).scrollIntoView({ behavior: "smooth" });
   };
+  
+  useEffect(() => {
+    const storedUserName = localStorage.getItem('username');
+    if (storedUserName) {
+      setUserName(storedUserName);
+    }
+
+    const fetchReports = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/reports/reports', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          }
+        });
+        console.log(data);
+        console.log(`Number of reports: ${data.length}`);
+        setReportName(data.length);
+      } catch (error) {
+        console.error('Error fetching reports:', error.message);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[#0a1a3c] text-white ">
@@ -22,7 +51,7 @@ export default function Dashboard() {
         <nav className="mt-5">
           <ul>
             <li className={`p-2 rounded-lg cursor-pointer flex flex-row  ${activeSection === 'dashboard' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('dashboard')}><img className="mr-3 ml-2 w-5 h-5.5" src='/home.svg'></img>Dashboard</li>
-            <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'reports' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('reports')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/Path.svg'></img>Reports</li>
+            <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'reports' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('reports')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/Path.svg'></img>EHR Analysis</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'goals' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('goals')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/he.svg'></img>  Goals</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'reminders' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('reminders')}><img className="mr-3 ml-2 w-6 h-6" src='/cal.svg'></img>Reminders</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'settings' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('settings')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/Settings.svg'></img>Settings</li>
@@ -47,7 +76,7 @@ export default function Dashboard() {
           {/* Stats Cards */}
           <div className="grid grid-cols-3 gap-4 mt-6 ml-9 mr-10">
             <div className="bg-gray-800 p-4 rounded-lg">
-              <h3> 0 Reports Uploaded So Far...</h3>
+              <span> <span className="text-[#00d197]">{reportname !== null ? reportname : "Loading..."}</span>  Reports Uploaded So Far...</span>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg">
               <h3 className="flex flex-row justify-around"> <p className="text-red-300">Latest Risk : </p> <p>Nothing , All Safe</p></h3>
@@ -97,7 +126,7 @@ export default function Dashboard() {
         <div className="h-[1px] w-[250px] bg-gray-200 mb-4"></div>
   <div class="text-center mb-4">
    <img src="Avatar.svg" className="rounded-full mx-auto mb-2 ml-[80px] h-[100px] w-[100px]"></img>
-    <h3 class="text-xl font-semibold">Charles Robbie</h3>
+    <h3 class="text-xl font-semibold">{userName}</h3>
     <p className="flex flex-row">25 years old | <img className="mr-[3px] ml-[1px] mt-[4px] h-4 w-4" src="lp.svg"></img> New York, USA</p>
   </div>
   <div class="bg-[#1d3b6e] p-4 rounded-xl mb-4">
