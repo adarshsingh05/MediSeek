@@ -6,6 +6,7 @@ import Achievements from './Pages/Achievments';
 import History from "./Pages/History";
 import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
+import DashboardUI from './Pages/DashboardUI';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="/history" element={<History/>}></Route>
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/dashboard" element={<Dashboard/>}></Route>
+          <Route path="/dashboardui" element={<DashboardUI/>}></Route>
         </Routes>
       </div>
     </Router>
