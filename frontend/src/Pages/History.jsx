@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import SignupModal from "./Signup";
-
 const ClientsPage = () => {
  
   
@@ -24,17 +23,27 @@ const ClientsPage = () => {
       }
   
       const fetchReports = async () => {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          console.error("No auth token found. Redirecting to login.");
+          return;
+        }
+      
         try {
           const { data } = await axios.get('http://localhost:5000/api/reports/reports', {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+              Authorization: `Bearer ${token}`,
             }
           });
           setClients(data);
         } catch (error) {
-          console.error('Error fetching reports:', error.message);
+          console.error('Error fetching reports:', error.response?.data || error.message);
+          if (error.response?.status === 401) {
+            alert("Session expired. Please log in again.");
+          }
         }
       };
+      
   
       fetchReports();
     }, []);
@@ -62,23 +71,8 @@ const ClientsPage = () => {
       setUserName(storedUserName);
     }
 
-    // Fetch reports from the MongoDB backend
-    const fetchReports = async () => {
-      try {
-        // You may need to add an authorization header depending on your setup
-        const { data } = await axios.get('http://localhost:5000/api/reports/reports', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Assuming token-based auth
-          }
-        });
-        setClients(data); // Store fetched reports in state
-      } catch (error) {
-        console.error('Error fetching reports:', error.message);
-      }
-    };
-
-    fetchReports();
-  }, []);
+   
+  });
   
   useEffect(() => {
     // Simulate a 4-5 second loading delay
@@ -95,21 +89,10 @@ const ClientsPage = () => {
       setUserName(storedUserName);
     }
 
-    const fetchReports = async () => {
-      try {
-        const { data } = await axios.get('http://localhost:5000/api/reports/reports', {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-          }
-        });
-        setClients(data);
-      } catch (error) {
-        console.error('Error fetching reports:', error.message);
-      }
-    };
+  
 
-    fetchReports();
-  }, []);
+    
+  });
 
   if (loading) {
     return (
@@ -126,7 +109,7 @@ const ClientsPage = () => {
             mediseek.<span className="text-gray-500">ai</span>
           </div>
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
-            {["Home", "Your Reports", "Dashboard", "About", "Features"].map((item) => (
+            {["Home", "Your Reports", "Dashboard", "About", "Vault"].map((item) => (
                  <li
                  key={item}
                  className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"

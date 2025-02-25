@@ -1,7 +1,9 @@
 const express = require('express');
 const PDFDocument = require('pdfkit');
 
-const Report = require('../models/Report');
+const {Report} = require('../models/Report');
+const {Scan} = require('../models/Report');
+const {LabReport} = require('../models/Report');
 const { authMiddleware } = require("../controller/authController");
 const axios = require('axios');
 const pdfParse = require('pdf-parse');
@@ -42,6 +44,65 @@ router.post('/upload',authMiddleware, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+router.post('/uploadscan',authMiddleware, async (req, res) => {
+    try {
+        console.log("User from token:", req.user);
+        const userId = req.user.id; // Get user ID from authentication middleware
+
+        const { scanName, supabaseUrl,documentName } = req.body;
+        if (!scanName || !supabaseUrl || !documentName) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+        console.log("incoming data", req.body);
+
+        const newScan = new Scan({
+            scanName,
+            documentName,
+            supabaseUrl,
+            userId // Store the user who uploaded
+        });
+        const savedScan = await newScan.save();
+        console.log("✅ Report Saved in MongoDB:", savedScan);
+
+        res.status(201).json({ message: "Report uploaded successfully"});
+      }
+
+        catch (error) {
+            console.error("❌ Upload Error:", error.message);
+        }
+      });
+router.post('/uploadlabreport',authMiddleware, async (req, res) => {
+    try {
+        console.log("User from token:", req.user);
+        const userId = req.user.id; // Get user ID from authentication middleware
+
+        const { hospitalName, supabaseUrl,reportName } = req.body;
+        if (!hospitalName || !supabaseUrl || !reportName) {
+            return res.status(400).json({ message: "Missing required fields" });
+        }
+        console.log("incoming data", req.body);
+
+        const SavedLabReport = new LabReport({
+          reportName,
+          hospitalName,
+                      supabaseUrl,
+            userId // Store the user who uploaded
+        });
+        const savedLabReport = await SavedLabReport.save();
+        console.log("✅ Report Saved in MongoDB:", savedLabReport);
+
+        res.status(201).json({ message: "Report uploaded successfully"});
+      }
+
+        catch (error) {
+            console.error("❌ Upload Error:", error.message);
+        }
+      });
+
+
+
+
+
 const genAI = new GoogleGenerativeAI('AIzaSyBkojcV2Zky8zAJk9k1zGVrtodmIU8Jc4k');
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 

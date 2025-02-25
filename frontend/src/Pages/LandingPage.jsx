@@ -122,30 +122,34 @@ const LandingPage = () => {
             mediseek.<span className="text-gray-500">ai</span>
           </div>
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
-            {["Home", "Your Reports", "Dashboard", "About", "Features"].map((item) => (
-              <li
-              key={item}
-              className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
-            >
-              {item === "Your Reports" ? (
-                <Link to="/History" className="text-[#434545]">
-                  {item}
-                </Link>
-              ) : item === "Home" ? (
-                <Link to="/" className="text-[#434545]">
-                  {item}
-                </Link>
-              ) : item === 'Dashboard' ? (
-                <Link to="/dashboard" className="text-[#434545]">
-                  {item}
-                </Link>
-              ):(
-                item
-              )}
-            </li>
-            
-            ))}
-          </div>
+  {["Home", "Your Reports", "Dashboard", "About", "Vault"].map((item) => (
+    <li
+      key={item}
+      className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+    >
+      {item === "Your Reports" ? (
+        <Link to="/History" className="text-[#434545]">
+          {item}
+        </Link>
+      ) : item === "Home" ? (
+        <Link to="/" className="text-[#434545]">
+          {item}
+        </Link>
+      ) : item === "Dashboard" ? (
+        <Link to="/dashboard" className="text-[#434545]">
+          {item}
+        </Link>
+      ) : item === "Vault" ? (
+        <Link to="/vault" className="text-[#434545]">
+          {item}
+        </Link>
+      ) : (
+        item
+      )}
+    </li>
+  ))}
+</div>
+
           {/* If user is logged in, show first letter of username */}
           {userName ? (
             <button  onClick={handleLogout} className="bg-teal-400 text-black px-4 py-2 rounded-lg">
