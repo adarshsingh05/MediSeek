@@ -307,5 +307,14 @@ router.get('/reports', authMiddleware, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+router.get('/scanreports', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id; // Get logged-in user ID
+        const reports = await Scan.find({ userId }); // Fetch only user's reports
+        res.json(reports);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
 
 module.exports = router;

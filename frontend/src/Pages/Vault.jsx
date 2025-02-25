@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Upload, FolderOpen, FileText, Share2, Download } from "lucide-react";
+import { Upload,  FileText, Share2, Download } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
+import { handleFileUpload } from "./fileuploadhandler";
 const VaultPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -15,10 +16,11 @@ const VaultPage = () => {
   const [scanName, setScanName] = useState("");
   const [amount, setAmount] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
   const [testType, setTestType] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedCategoryName, setSelectedCategoryName] = useState("Your Documents"); // For changing the heading dynamically
+  const [selectedCategoryName, setSelectedCategoryName] = useState("Your Documents"); // For changing the heading dynamicall
   const [files, setFiles] = useState([
     { id: 1, name: "Blood Test Report.pdf", category: "Lab Reports", date: "2025-02-20" },
     { id: 2, name: "MRI Scan.jpg", category: "Scans", date: "2025-02-18" },
@@ -352,18 +354,28 @@ const VaultPage = () => {
               )}
 
               {/* Buttons */}
-              <div className="flex justify-between space-x-3 mt-4">
-                <button
-                  // onClick={handleUpload}
-                  className={`px-4 py-2 rounded-lg ${
-                    isUploading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-500 hover:bg-green-600"
-                  } text-black`}
-                  disabled={isUploading} // Disable during upload
-                >
-                  {isUploading ? "Uploading..." : "Upload"}
-                </button>
+              <button
+  onClick={async () => {
+    if (testReport === "scans" && scanName && DocumentName && files.length > 0) {
+      setIsUploading(true);
+      // Make sure you have the file selected
+      await handleFileUpload(scanName, DocumentName, selectedFile, setIsUploading, (error) => {
+        alert(error);
+      });
+    } else {
+      alert("Please select the correct document type and fill out all required fields.");
+    }
+  }}
+  className={`px-4 py-2 rounded-lg ${
+    isUploading
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-green-500 hover:bg-green-600"
+  } text-black`}
+  disabled={isUploading} // Disable during upload
+>
+  {isUploading ? "Uploading..." : "Upload"}
+</button>
+
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="bg-gray-500 text-black px-4 py-2 rounded-lg border-2 border-gray-800 hover:bg-gray-600"
@@ -390,7 +402,7 @@ const VaultPage = () => {
                 </ul>
               </div>
             </div>
-          </div>
+         
         )}
       </div>
     

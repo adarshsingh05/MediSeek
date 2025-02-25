@@ -1,96 +1,50 @@
-import axios from "axios";
-import { supabase } from "./supabaseClient";
+import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
+import { v4 as uuidv4 } from 'uuid'; // Add uuid package for generating unique IDs
+const supabase = createClient('https://rlkflisvqgndvaojqoao.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsa2ZsaXN2cWduZHZhb2pxb2FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk0MzM4NTUsImV4cCI6MjA1NTAwOTg1NX0.X-ottuHt6nzv5KpBG582AFgJ7PniCzz_xA_resiXfR8');
 
-// Function to handle file input change
-export const handleFileChange = (e, setFile) => {
-  setFile(e.target.files[0]);
-};
-
-// Function to handle form submission and upload process
-export const handleScanSubmit = async (
-  
-  file,
-  scanName,
-  documentName,
-  testReport, // Add the testReport (document type) to check if it's a scan
-  setMessage,
-  setIsUploading
-) => {
-
-  // Check if the document type is "scans"
-  if (testReport !== "scans") {
-    setMessage("Please select 'Scans' as the document type to upload a scan.");
-    return;
-  }
-
-  if (!file || !scanName || !documentName) {
-    setMessage("Please fill all the fields and choose a file.");
-    return;
-  }
-
-  setIsUploading(true);
-  setMessage("");
-
-  // Generate a unique file name
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${Date.now()}.${fileExt}`; // Unique filename
-  
+export const handleFileUpload = async (scanName, documentName, file, setUploading, setError) => {
   try {
-    // Upload the file to Supabase storage
-    const { data, error } = await supabase.storage
-      .from("usersrep")
-      .upload(fileName, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-    
-    if (error) {
-      console.error("Upload failed:", error.message);
-      alert("Upload failed. Try again.");
-      setIsUploading(false);
-      return;
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
+      throw new Error("Authentication token not found");
     }
 
-    console.log("Upload successful:", data);
-    
-    // Correct File URL
-    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/scans/${data.path}`;
+    // Generate a unique file name
+    const uniqueFileName = `${uuidv4()}_${file.name}`;
+
+    // Upload the file to Supabase
+    const { data, error: uploadError } = await supabase.storage
+      .from('scans')
+      .upload(`${uniqueFileName}`, file);
+
+    console.log('Supabase upload result:', { data, uploadError });
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    const fileUrl = `https://rlkflisvqgndvaojqoao.supabase.co/storage/v1/object/public/scans//${data.path}`;
     console.log("📌 File URL:", fileUrl);
 
-    // Send file URL and other details to the backend
-    const token = localStorage.getItem("authToken"); // Get stored token
-    if (!token) {
-      alert("Authentication error: Please log in again.");
-      setIsUploading(false);
-      return;
-    }
 
-    const response = await fetch("http://localhost:5000/api/reports/uploadscan", {
-      method: "POST",
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        scanName, // Send scan name
-        documentName, // Send document name
-        supabaseUrl: fileUrl, // File URL from Supabase
-      }),
-    });
+    // Send file details to the backend
+    const response = await axios.post(
+      'http://localhost:5000/api/reports/uploadscan',
+      { scanName, documentName, supabaseUrl: fileUrl },
+      {
+        headers: { Authorization: `Bearer ${authToken}` }, // Pass token
+      }
+    );
 
-    const result = await response.json();
-    if (response.ok) {
-      console.log("✅ Report Saved in MongoDB:", result);
-      alert("File uploaded and saved to database!");
+    if (response.status === 201) {
+      alert('File uploaded successfully!');
     } else {
-      console.error("❌ Failed to save report:", result.message);
-      alert("Failed to save report to database.");
+      throw new Error('Error uploading file to backend');
     }
-
-  } catch (error) {
-    console.error("❌ Error sending data to backend:", error);
-    alert("Error saving file data.");
+  } catch (err) {
+    setError(`Error: ${err.message}`);
   } finally {
-    setIsUploading(false); // Stop Loader
+    setUploading(false);
   }
 };
