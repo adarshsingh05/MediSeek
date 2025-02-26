@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Upload,  FileText, Share2, Download } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
+import { useEffect } from "react";
+
 import { handleFileUpload } from "./fileuploadhandler";
 const VaultPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,8 +21,12 @@ const VaultPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const navigate = useNavigate();
   const [testType, setTestType] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedCategoryName, setSelectedCategoryName] = useState("Your Documents"); // For changing the heading dynamicall
+
+  const[scans, setScans] = useState([]);
   const [files, setFiles] = useState([
     { id: 1, name: "Blood Test Report.pdf", category: "Lab Reports", date: "2025-02-20" },
     { id: 2, name: "MRI Scan.jpg", category: "Scans", date: "2025-02-18" },
@@ -37,6 +43,40 @@ const VaultPage = () => {
   const handleBackClick = () => {
     navigate('/');
   };
+
+  // get request for the scans
+
+useEffect(() => {
+  const fetchReports = async () => {
+      try {
+          const response = await fetch("http://localhost:5000/api/reports/scanreports", {
+              headers: {
+                  Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+              },
+          });
+          if (!response.ok) {
+              const errorText = await response.text();
+              console.error("Error Response:", errorText);
+              throw new Error("Failed to fetch reports");
+          }
+
+          const data = await response.json();
+          console.log("Fetched Reports:", data);
+          setScans(data);
+      } catch (err) {
+          setError(err.message);
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  fetchReports();
+}, []); // ✅ Keep dependencies stable
+
+// ✅ Log `scans` correctly inside another effect
+useEffect(() => {
+  console.log("Updated Scans:", scans);
+}, [scans.length]); // Only trigger when the array size changes
 
   
 
@@ -194,25 +234,31 @@ const VaultPage = () => {
         >
           {/* Display only scans */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files
-              .filter((file) => file.category === "Scans")
-              .map((file) => (
-                <div
-                  key={file.id}
-                  className="p-4 border rounded-lg flex items-center justify-between"
-                >
-                  <div>
-                    <FileText className="text-gray-600" />
-                    <p className="text-sm text-black font-medium">{file.name}</p>
-                    <p className="text-xs text-gray-500">{file.date}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Share2 className="text-blue-500 cursor-pointer" />
-                    <Download className="text-green-500 cursor-pointer" />
-                    <Eye className="text-gray-500 cursor-pointer" />
-                  </div>
-                </div>
-              ))}
+          {scans.length > 0 ? (
+  scans.map((scan) => (
+    <div key={scan._id} className="p-4 border rounded-lg flex items-center justify-between">
+      {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
+      <div className="flex flex-col items-start">
+        <FileText className="text-gray-600 mb-1" />
+        <p className="text-sm text-black font-medium">{scan.scanName || "Unnamed Scan"}</p>
+        <p className="text-xs text-gray-500">{new Date(scan.date).toLocaleDateString()}</p>
+      </div>
+
+      {/* Center: Document Name */}
+      <p className="text-sm text-black font-medium">{scan.documentName || "Unnamed Scan"}</p>
+
+      {/* Right Side: Icons (View, Share, Download) */}
+      <div className="flex gap-2">
+        <Eye className="text-gray-500 cursor-pointer" />
+        <Share2 className="text-blue-500 cursor-pointer" />
+        <Download className="text-green-500 cursor-pointer" />
+      </div>
+    </div>
+  ))
+) : (
+  <p className="text-gray-600 text-center w-full">No scan reports available</p>
+)}
+
           </div>
         </div>
       </div>
