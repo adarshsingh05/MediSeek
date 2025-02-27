@@ -28,6 +28,7 @@ const VaultPage = () => {
     useState("Your Documents"); // For changing the heading dynamicall
 
   const [scans, setScans] = useState([]);
+  const [labReports, setLabReports] = useState([]);
   const [files, setFiles] = useState([
     {
       id: 1,
@@ -55,13 +56,11 @@ const VaultPage = () => {
     navigate("/");
   };
 
-  // get request for the scans
-
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchReports = async (endpoint, setState) => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/reports/scanreports",
+          `http://localhost:5000/api/reports/${endpoint}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -70,27 +69,24 @@ const VaultPage = () => {
         );
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("Error Response:", errorText);
-          throw new Error("Failed to fetch reports");
+          console.error(`Error Response (${endpoint}):`, errorText);
+          throw new Error(`Failed to fetch ${endpoint}`);
         }
-
+  
         const data = await response.json();
-        console.log("Fetched Reports:", data);
-        setScans(data);
+        console.log(`Fetched ${endpoint}:`, data);
+        setState(data);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchReports();
+  
+    fetchReports("scanreports", setScans); // Fetch scan reports
+    fetchReports("labreports", setLabReports); // Fetch lab reports
   }, []); // ✅ Keep dependencies stable
-
-  // ✅ Log `scans` correctly inside another effect
-  useEffect(() => {
-    console.log("Updated Scans:", scans);
-  }, [scans.length]); // Only trigger when the array size changes
+  
 
   return (
     <div className="min-h-screen bg-[#dbeff8] p-6">
@@ -250,28 +246,42 @@ const VaultPage = () => {
           }`}
         >
           {/* Display only lab reports */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files
-              .filter((file) => file.category === "Lab Reports")
-              .map((file) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
+          {labReports.length > 0 ? (
+              labReports.map((scan) => (
                 <div
-                  key={file.id}
-                  className="p-4 border rounded-lg flex items-center justify-between"
-                >
-                  <div>
-                    <FileText className="text-gray-600" />
+                  key={scan._id}
+                  className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105">
+                  {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
+                  <div className="flex flex-col items-start">
+                    <FileText className="text-gray-600 mb-1" />
                     <p className="text-sm text-black font-medium">
-                      {file.name}
+                      {scan.hospitalName || "Unnamed Hospital"}
                     </p>
-                    <p className="text-xs text-gray-500">{file.date}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(scan.date).toLocaleDateString()}
+                    </p>
                   </div>
+
+                  {/* Center: Document Name */}
+                  <p className="text-sm text-black font-medium">
+                    {scan.reportName || "Unnamed Scan"}
+                  </p>
+
+                  {/* Right Side: Icons (View, Share, Download) */}
                   <div className="flex gap-2">
+                    <Eye className="text-gray-500 cursor-pointer" />
                     <Share2 className="text-blue-500 cursor-pointer" />
                     <Download className="text-green-500 cursor-pointer" />
-                    <Eye className="text-gray-500 cursor-pointer" />
                   </div>
                 </div>
-              ))}
+              ))
+            ) : (
+              <p className="text-gray-600 text-center w-full">
+                No scan reports available
+              </p>
+            )}
           </div>
         </div>
 
@@ -281,13 +291,13 @@ const VaultPage = () => {
           }`}
         >
           {/* Display only scans */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-2 gap-4">
             {scans.length > 0 ? (
               scans.map((scan) => (
                 <div
                   key={scan._id}
-                  className="p-4 border rounded-lg flex items-center justify-between"
-                >
+                  className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105">
                   {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
                   <div className="flex flex-col items-start">
                     <FileText className="text-gray-600 mb-1" />
