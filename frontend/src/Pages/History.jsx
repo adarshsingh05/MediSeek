@@ -109,7 +109,7 @@ const ClientsPage = () => {
             mediseek.<span className="text-gray-500">ai</span>
           </div>
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
-            {["Home", "Your Reports", "Dashboard", "About", "Vault"].map((item) => (
+            {["Home", "Your Reports", "Dashboard", "AI Ground", "Vault"].map((item) => (
                  <li
                  key={item}
                  className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"

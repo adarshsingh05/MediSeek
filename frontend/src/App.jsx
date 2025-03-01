@@ -7,6 +7,7 @@ import History from "./Pages/History";
 import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
 import VaultPage from './Pages/Vault';
+import ChatWidget from './Pages/chatui';
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
           <Route path="/login" element={<Login/>}></Route>
           <Route path="/dashboard" element={<Dashboard/>}></Route>
           <Route path="/vault" element={<VaultPage/>}></Route>
+          <Route path="/chat" element={<ChatWidget/>}></Route>
         </Routes>
       </div>
     </Router>

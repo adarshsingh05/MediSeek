@@ -122,10 +122,10 @@ const LandingPage = () => {
             mediseek.<span className="text-gray-500">ai</span>
           </div>
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
-  {["Home", "Your Reports", "Dashboard", "About", "Vault"].map((item) => (
+  {["Home", "Your Reports", "Dashboard", "AI Ground", "Vault"].map((item) => (
     <li
       key={item}
-      className="px-4 py-2 hover:border-2 rounded-xl border-gray-800 list-none"
+      className="px-4 py-1 hover:border-1 rounded-xl border-gray-800 list-none"
     >
       {item === "Your Reports" ? (
         <Link to="/History" className="text-[#434545]">
@@ -141,6 +141,10 @@ const LandingPage = () => {
         </Link>
       ) : item === "Vault" ? (
         <Link to="/vault" className="text-[#434545]">
+          {item}
+        </Link>
+      )  : item === "AI Ground" ? (
+        <Link to="/chat" className="text-[#434545]">
           {item}
         </Link>
       ) : (

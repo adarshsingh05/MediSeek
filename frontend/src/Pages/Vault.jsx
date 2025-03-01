@@ -3,14 +3,16 @@ import { Upload, FileText, Share2, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { useEffect } from "react";
+import { handleprescriptionUpload } from "./fileuploadhandler";
 import { handleLabUpload } from "./fileuploadhandler";
 import { handleFileUpload } from "./fileuploadhandler";
 const VaultPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [pres, setPres] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [DocumentName, setDocumentName] = useState(""); // New state for patient name
   const [testReport, setTestReport] = useState("");
+
   const [doctorName, setDoctorName] = useState("");
   const [hospitalName, setHospitalName] = useState("");
   const [diseaseName, setDiseaseName] = useState("");
@@ -72,7 +74,7 @@ const VaultPage = () => {
           console.error(`Error Response (${endpoint}):`, errorText);
           throw new Error(`Failed to fetch ${endpoint}`);
         }
-  
+
         const data = await response.json();
         console.log(`Fetched ${endpoint}:`, data);
         setState(data);
@@ -82,11 +84,11 @@ const VaultPage = () => {
         setLoading(false);
       }
     };
-  
+
     fetchReports("scanreports", setScans); // Fetch scan reports
+    fetchReports("getpres", setPres); // Fetch scan reports
     fetchReports("labreports", setLabReports); // Fetch lab reports
   }, []); // ✅ Keep dependencies stable
-  
 
   return (
     <div className="min-h-screen bg-[#dbeff8] p-6">
@@ -188,16 +190,121 @@ const VaultPage = () => {
           }`}
         >
           {/* Display all documents */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files.map((file) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2 h-[320px] overflow-y-auto">  
+                      {pres.map((pres) => (
               <div
-                key={file.id}
-                className="p-4 border rounded-lg flex items-center justify-between"
+                key={pres._id}
+                className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
               >
                 <div>
                   <FileText className="text-gray-600" />
-                  <p className="text-sm text-black font-medium">{file.name}</p>
-                  <p className="text-xs text-gray-500">{file.date}</p>
+                  <p className="text-sm text-black font-medium">
+                    {pres.doctorName}
+                  </p>
+                  <p className="text-xs text-gray-500">{pres.hospitalName}</p>
+                </div>
+                <div className="flex gap-2">
+                  <Share2 className="text-blue-500 cursor-pointer" />
+                  <Download className="text-green-500 cursor-pointer" />
+                  <Eye className="text-gray-500 cursor-pointer" />
+                </div>
+              </div>
+            ))}
+            {labReports.length > 0 ? (
+              labReports.map((scan) => (
+                <div
+                  key={scan._id}
+                  className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
+                >
+                  {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
+                  <div className="flex flex-col items-start">
+                    <FileText className="text-gray-600 mb-1" />
+                    <p className="text-sm text-black font-medium">
+                      {scan.hospitalName || "Unnamed Hospital"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(scan.date).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {/* Center: Document Name */}
+                  <p className="text-sm text-black font-medium">
+                    {scan.reportName || "Unnamed Scan"}
+                  </p>
+
+                  {/* Right Side: Icons (View, Share, Download) */}
+                  <div className="flex gap-2">
+                    <Eye className="text-gray-500 cursor-pointer" />
+                    <Share2 className="text-blue-500 cursor-pointer" />
+                    <Download className="text-green-500 cursor-pointer" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center w-full">
+                No scan reports available
+              </p>
+            )}
+            {scans.length > 0 ? (
+              scans.map((scan) => (
+                <div
+                  key={scan._id}
+                  className="relative p-4 border-3 border-white rounded-lg h-[90px] w-[470px] flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
+                >
+                  {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
+                  <div className="flex flex-col items-start">
+                    <FileText className="text-gray-600 mb-1" />
+                    <p className="text-sm text-black font-medium">
+                      {scan.scanName || "Unnamed Scan"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(scan.date).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {/* Center: Document Name */}
+                  <p className="text-sm text-black font-medium">
+                    {scan.documentName || "Unnamed Scan"}
+                  </p>
+
+                  {/* Right Side: Icons (View, Share, Download) */}
+                  <div className="flex gap-2">
+                    <Eye className="text-gray-500 cursor-pointer" />
+                    <Share2 className="text-blue-500 cursor-pointer" />
+                    <Download className="text-green-500 cursor-pointer" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-600 text-center w-full">
+                No scan reports available
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div
+          className={`transition-all duration-500 ease-in-out ${
+            selectedCategory === "prescriptions" ? "block bg-blue-50" : "hidden"
+          }`}
+        >
+          {/* Display only prescriptions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2 h-[320px] overflow-y-auto">  
+            {pres.map((pres) => (
+              <div
+                key={pres._id}
+                className="relative p-4 border-3 border-white rounded-lg h-[90px] w-[470px] flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
+              >
+                <div>
+                  <FileText className="text-gray-600" />
+                  <p className="text-sm text-black font-medium">
+                    {pres.doctorName}
+                  </p>
+                  <p className="text-xs text-gray-500">{pres.hospitalName}</p>
                 </div>
                 <div className="flex gap-2">
                   <Share2 className="text-blue-500 cursor-pointer" />
@@ -211,48 +318,18 @@ const VaultPage = () => {
 
         <div
           className={`transition-all duration-500 ease-in-out ${
-            selectedCategory === "prescriptions" ? "block bg-blue-50" : "hidden"
-          }`}
-        >
-          {/* Display only prescriptions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {files
-              .filter((file) => file.category === "Prescriptions")
-              .map((file) => (
-                <div
-                  key={file.id}
-                  className="p-4 border rounded-lg flex items-center justify-between"
-                >
-                  <div>
-                    <FileText className="text-gray-600" />
-                    <p className="text-sm text-black font-medium">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-gray-500">{file.date}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Share2 className="text-blue-500 cursor-pointer" />
-                    <Download className="text-green-500 cursor-pointer" />
-                    <Eye className="text-gray-500 cursor-pointer" />
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        <div
-          className={`transition-all duration-500 ease-in-out ${
             selectedCategory === "labReports" ? "block bg-red-50" : "hidden"
           }`}
         >
           {/* Display only lab reports */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-          {labReports.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2 h-[320px] overflow-y-auto">  
+            {labReports.length > 0 ? (
               labReports.map((scan) => (
                 <div
                   key={scan._id}
-                  className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
-                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105">
+                  className="relative p-4 border-3 h-[90px] w-[470px] border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
+                >
                   {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
                   <div className="flex flex-col items-start">
                     <FileText className="text-gray-600 mb-1" />
@@ -286,18 +363,19 @@ const VaultPage = () => {
         </div>
 
         <div
-          className={`transition-all duration-500 ease-in-out ${
-            selectedCategory === "scans" ? "block bg-yellow-50" : "hidden"
+          className={`transition-all  duration-500 ease-in-out ${
+            selectedCategory === "scans" ? "block bg-yellow-50 " : "hidden"
           }`}
         >
           {/* Display only scans */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-2 h-[320px] overflow-y-auto">  
             {scans.length > 0 ? (
               scans.map((scan) => (
                 <div
                   key={scan._id}
-                  className="relative p-4 border-3 border-white rounded-lg flex items-center justify-between 
-                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105">
+                  className="relative p-4 border-3 h-[90px] w-[470px] border-white rounded-lg flex items-center justify-between 
+                  bg-white/10 backdrop-blur-lg shadow-lg transition-transform duration-300 hover:-translate-y-2 hover:scale-105"
+                >
                   {/* Left Side: File Icon, Scan Name, and Date (Stacked) */}
                   <div className="flex flex-col items-start">
                     <FileText className="text-gray-600 mb-1" />
@@ -489,6 +567,27 @@ const VaultPage = () => {
                   );
                 }
                 if (
+                  testReport === "prescriptions" &&
+                  doctorName &&
+                  hospitalName &&
+                  diseaseName &&
+                  files.length > 0
+                ) {
+                  setIsUploading(true);
+                  // Make sure you have the file selected
+                  await handleprescriptionUpload(
+                    hospitalName,
+                    diseaseName,
+
+                    doctorName,
+                    selectedFile,
+                    setIsUploading,
+                    (error) => {
+                      alert(error);
+                    }
+                  );
+                }
+                if (
                   testReport === "labreport" &&
                   reportName &&
                   DocumentName &&
@@ -499,8 +598,7 @@ const VaultPage = () => {
                   await handleLabUpload(
                     hospitalName,
                     reportName,
-                   
-                    
+
                     selectedFile,
                     setIsUploading,
                     (error) => {
