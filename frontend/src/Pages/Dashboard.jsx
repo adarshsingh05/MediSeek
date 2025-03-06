@@ -40,6 +40,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex min-h-screen bg-[#0a1a3c] text-white ">
+
       {/* Sidebar */}
       <aside className="w-64 p-5 bg-[#112b5e] flex flex-col fixed h-full rounded-2xl m-2 mb-2">
         <div className="flex flex-row p-2">
