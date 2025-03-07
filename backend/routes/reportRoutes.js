@@ -13,6 +13,7 @@ const fs = require("fs");
 const router = express.Router();
 const {marked} = require('marked'); // <--- Here, at the top level
 const pdf = require('html-pdf');
+const Doctor = require('../models/doctors');
 
 // 📌 API to Save Report Metadata in MongoDB
 router.post('/upload',authMiddleware, async (req, res) => {
@@ -403,6 +404,14 @@ router.get('/getpres', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
+});
+router.get('/doctors', async (req, res) => {
+  try {
+      const doctors = await Doctor.find(); // Fetch all doctors
+      res.json(doctors);
+  } catch (error) {
+      res.status(500).json({ message: error.message });
+  }
 });
 
 module.exports = router;

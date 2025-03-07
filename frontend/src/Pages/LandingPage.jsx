@@ -12,6 +12,7 @@ const LandingPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [role, setRole] = useState(null); // State to store user's role
   const [userName, setUserName] = useState(null); // State to store user's name
   const [patientName, setPatientName] = useState(""); // New state for patient name
   const [testReport, setTestReport] = useState(""); // New state for test report
@@ -19,8 +20,12 @@ const LandingPage = () => {
   useEffect(() => {
     // Fetch user name from localStorage or any other global state if logged in
     const storedUserName = localStorage.getItem("username");
+    const storedRole = localStorage.getItem("role");
     if (storedUserName) {
       setUserName(storedUserName);
+    }
+    if (storedRole) {
+      setRole(storedRole);
     }
   }, []);
 
@@ -113,6 +118,23 @@ const LandingPage = () => {
     }
   };
 
+  const menuItems = role === "doctor"
+  ? [
+      { name: "Home", path: "/" },
+      { name: "Your Patients", path: "/patients" },
+      { name: "Dashboard", path: "/doctorsredg" },
+      { name: "AI Support", path: "/ai-support" },
+      { name: "Workspace", path: "/workspace" }
+    ]
+  : [
+      { name: "Home", path: "/" },
+      { name: "Your Reports", path: "/History" },
+      { name: "Dashboard", path: "/dashboard" },
+      { name: "AI Ground", path: "/chat" },
+      { name: "Vault", path: "/vault" },
+      { name: "Our Doctors", path: "/doctors" } 
+    ];
+
   return (
     <>
       <div className="w-screen min-h-screen">
@@ -122,36 +144,15 @@ const LandingPage = () => {
             mediseek.<span className="text-gray-500">ai</span>
           </div>
           <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
-  {["Home", "Your Reports", "Dashboard", "AI Ground", "Vault"].map((item) => (
-    <li
-      key={item}
-      className="px-4 py-1 hover:border-1 rounded-xl border-gray-800 list-none"
-    >
-      {item === "Your Reports" ? (
-        <Link to="/History" className="text-[#434545]">
-          {item}
+          <div className="hidden text-xl font-extrabold cursor-pointer md:flex font-mono space-x-6 text-[#434545]">
+    {menuItems.map((item) => (
+      <li key={item.name} className="px-4 py-1 hover:border-1 rounded-xl border-gray-800 list-none">
+        <Link to={item.path} className="text-[#434545]">
+          {item.name}
         </Link>
-      ) : item === "Home" ? (
-        <Link to="/" className="text-[#434545]">
-          {item}
-        </Link>
-      ) : item === "Dashboard" ? (
-        <Link to="/dashboard" className="text-[#434545]">
-          {item}
-        </Link>
-      ) : item === "Vault" ? (
-        <Link to="/vault" className="text-[#434545]">
-          {item}
-        </Link>
-      )  : item === "AI Ground" ? (
-        <Link to="/chat" className="text-[#434545]">
-          {item}
-        </Link>
-      ) : (
-        item
-      )}
-    </li>
-  ))}
+      </li>
+    ))}
+  </div>
 </div>
 
           {/* If user is logged in, show first letter of username */}
@@ -177,10 +178,11 @@ const LandingPage = () => {
         <div className="flex flex-col md:flex-row items-center justify-evenly text-center md:text-left py-40 px-6 w-screen bg-gradient-to-b from-[#bce1f1] to-white">
           {/* Left Side - Text */}
           <div className="md:w-1/2 ml-52 mr-[-50px] flex flex-col items-center md:items-start">
-            <h1 className="text-5xl font-semibold text-gray-800 w-full">
-              Empower your Patients with the Best Technology
-            </h1>
-            <div className="w-[500px] m-2 ml-10 border-b-2 border-gray-500 my-4"></div>
+          <h1 className="text-5xl font-semibold text-gray-800 w-full">
+  {role === "doctor" ? "Facilitates Patients seamlessly with AI" : "Empower your Patients with the Best Technology"}
+</h1>
+
+            <div className="w-[500px] mt-6 border-b-2 border-gray-500 my-4"></div>
             <p className="text-gray-700 text-lg w-full max-w-lg">
               Smart Reports processes <span className="font-bold">diagnostic lab test reports</span>, and
               <span className="font-bold"> translates patients’ health and biomarker values </span>

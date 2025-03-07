@@ -23,6 +23,7 @@ const Login = () => {
         // Store the token and username in localStorage
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("username", response.data.username);
+        localStorage.setItem("role", response.data.role);
         
         // Redirect to Dashboard after login
         navigate("/");

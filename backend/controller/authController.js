@@ -1,7 +1,10 @@
+
+
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User.js");
 const nodemailer = require("nodemailer");
+const Doctor = require("../models/doctors.js");
 
 
 // Email Transporter
@@ -33,14 +36,14 @@ const authMiddleware = async (req, res, next) => {
 // Register User
  const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password,role } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: "Email already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPassword });
+    const user = new User({ name, email, password: hashedPassword,role });
     await user.save();
 
     // Create Email Verification Token
@@ -102,7 +105,8 @@ const verifyEmail = async (req, res) => {
     res.cookie("token", token, { httpOnly: true }).json({
       message: "Login successful",
       token,
-      username: User.name // Send the username as well
+      username: user.name, // Send the username as well
+      role: user.role // Send the username as well
     });  } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -119,6 +123,38 @@ const logout = (req, res) => {
   }
 };
 
+const doctorRedg =  async (req, res) => {
+  try {
+    const { doctorId, name, specialty, location, bio, profileImage, availableDays, availableTimeStart, availableTimeEnd, appointmentDuration, email } = req.body;
+
+    // Check if the doctor already exists
+    
+    // Create a new doctor instance
+    const newDoctor = new Doctor({
+      doctorId,
+      name,
+      specialty,
+      location,
+      bio,
+      profileImage,
+      availableDays,
+      availableTimeStart,
+      availableTimeEnd,
+      appointmentDuration,
+        email
+    });
+
+    // Save to the database
+    await newDoctor.save();
+
+    res.status(201).json({ message: 'Doctor registered successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 
 // Export all functions
 module.exports = {
@@ -127,4 +163,6 @@ module.exports = {
     login,
     logout,
     authMiddleware,
+    doctorRedg,
   };
+

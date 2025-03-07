@@ -8,6 +8,8 @@ import Login from './Pages/Login';
 import Dashboard from './Pages/Dashboard';
 import VaultPage from './Pages/Vault';
 import ChatWidget from './Pages/chatui';
+import DoctorsPage from './Pages/doctors';
+import DoctorRegistration from './Pages/doctorredg';
 
 const App = () => {
   return (
@@ -28,6 +30,8 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard/>}></Route>
           <Route path="/vault" element={<VaultPage/>}></Route>
           <Route path="/chat" element={<ChatWidget/>}></Route>
+          <Route path="/doctors" element={<DoctorsPage/>}></Route>
+          <Route path="/doctorsredg" element={<DoctorRegistration/>}></Route>
         </Routes>
       </div>
     </Router>

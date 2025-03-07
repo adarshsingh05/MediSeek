@@ -8,11 +8,12 @@ const SignupModal = ({ isOpen, onClose }) => {
     name: "",
     email: "",
     password: "",
+    role: "", // Default role
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false); // For success popup
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,10 +36,9 @@ const SignupModal = ({ isOpen, onClose }) => {
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Signup failed");
 
-      setShowSuccess(true); // Show success popup
-      setFormData({ name: "", email: "", password: "" });
+      setShowSuccess(true);
+      setFormData({ name: "", email: "", password: "", role: "User" });
 
-      // Automatically close modal after 3 seconds
       setTimeout(() => {
         setShowSuccess(false);
         onClose();
@@ -59,7 +59,7 @@ const SignupModal = ({ isOpen, onClose }) => {
         className="flex w-full max-w-4xl bg-white rounded-lg shadow-lg overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Left Section (Illustration) */}
+        {/* Left Section */}
         <div className="hidden md:flex w-1/2 bg-[#D9F0F1] items-center justify-center relative">
           <div className="absolute top-6 left-6">
             <img src="your-logo-url.png" alt="Logo" className="w-10 h-10" />
@@ -72,9 +72,8 @@ const SignupModal = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Right Section (Signup Form) */}
+        {/* Right Section */}
         <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 relative">
-          {/* Close Button */}
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl"
@@ -84,7 +83,6 @@ const SignupModal = ({ isOpen, onClose }) => {
 
           <h2 className="text-3xl text-black font-bold mb-6">Create an Account</h2>
 
-          {/* Social Login Buttons */}
           <div className="flex w-full max-w-sm gap-4">
             <button className="flex text-black items-center w-1/2 gap-2 px-4 py-2 border rounded-lg shadow hover:bg-gray-100">
               <img
@@ -104,13 +102,10 @@ const SignupModal = ({ isOpen, onClose }) => {
             </button>
           </div>
 
-          {/* Divider */}
           <div className="text-gray-500 my-4">- OR -</div>
 
-          {/* Error Message */}
           {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
-          {/* Signup Form */}
           <form className="w-full text-black max-w-sm flex flex-col gap-4" onSubmit={handleSubmit}>
             <input
               type="text"
@@ -146,7 +141,18 @@ const SignupModal = ({ isOpen, onClose }) => {
               <span className="absolute right-3 top-3 cursor-pointer text-gray-500">👁️</span>
             </div>
 
-            {/* Signup Button with Loader */}
+            {/* New Dropdown for Role Selection */}
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              disabled={loading}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="User">Doctor</option>
+              <option value="Recruiter">Patient</option>
+            </select>
+
             <button
               type="submit"
               disabled={loading}
@@ -160,7 +166,6 @@ const SignupModal = ({ isOpen, onClose }) => {
             </button>
           </form>
 
-          {/* Login Redirect */}
           <p className="text-black mt-4">
             Already have an account?{" "}
             <a href="/login" className="text-blue-500 hover:underline">
