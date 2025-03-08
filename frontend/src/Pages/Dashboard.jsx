@@ -45,7 +45,7 @@ export default function Dashboard() {
       <aside className="w-64 p-5 bg-[#112b5e] flex flex-col fixed h-full rounded-2xl m-2 mb-2">
         <div className="flex flex-row p-2">
         <img className="h-7 w-6 ml-2 mr-3" src="/docl.png"></img>
-        <h1 className="text-xl font-bold font-mono">medicus.ai</h1>
+        <h1 className="text-xl font-bold font-mono">mediseek.ai</h1>
         
         </div>
         <div className="h-[1px] w-[212px] bg-gray-200 rounded-4xl" ></div>

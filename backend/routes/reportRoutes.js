@@ -131,7 +131,7 @@ router.post('/uploadprescription',authMiddleware, async (req, res) => {
 
 
 
-      const genAI = new GoogleGenerativeAI('AIzaSyBkojcV2Zky8zAJk9k1zGVrtodmIU8Jc4k');
+      const genAI = new GoogleGenerativeAI('AIzaSyBCOb-nGoETvhIQKY6KjXouGICkr8DK2rE');
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       
       router.post('/process-report', async (req, res) => {
