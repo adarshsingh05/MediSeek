@@ -106,7 +106,8 @@ const verifyEmail = async (req, res) => {
       message: "Login successful",
       token,
       username: user.name, // Send the username as well
-      role: user.role // Send the username as well
+      role: user.role, // Send the username as well
+      email: user.email
     });  } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -154,11 +155,31 @@ const doctorRedg =  async (req, res) => {
   }
 };
 
+const doctorredgdone = async (req, res) => {
+  try {
+    const { email } = req.body;
+    console.log("Checking email in DB:", email);
+
+    if (!email) return res.status(400).json({ message: "Email is required" });
+
+    const doctor = await Doctor.findOne({ email: { $regex: new RegExp("^" + email + "$", "i") } });
+    console.log("Doctor Found:", doctor); // ✅ Log the result
+
+    if (!doctor) return res.status(404).json({ message: "Doctor not found" });
+
+    res.status(200).json({ message: "Doctor found", doctor });
+  } catch (err) {
+    console.error("Server Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 
 // Export all functions
 module.exports = {
     register,
+    doctorredgdone,
     verifyEmail,
     login,
     logout,

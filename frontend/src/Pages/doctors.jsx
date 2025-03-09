@@ -27,6 +27,7 @@ const DoctorFinder = () => {
 
     fetchDoctors();
   }, []);
+  
 
   const toggleFavorite = (doctorId) => {
     setFavorite(prev => ({
@@ -239,13 +240,13 @@ const DoctorFinder = () => {
                     <div className="mr-2 p-1 rounded-full bg-gray-50 group-hover:bg-blue-50 transition-colors">
                       <Calendar className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                     </div>
-                    <span>Available: {doctor.availability}</span>
-                  </div>
+                    <span>Available: {doctor.availableDays.join(", ")}</span>                  </div>
+                  
                   <div className="flex items-center text-gray-600 group">
                     <div className="mr-2 p-1 rounded-full bg-gray-50 group-hover:bg-blue-50 transition-colors">
                       <Clock className="h-4 w-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
                     </div>
-                    <span>{doctor.experience} years experience</span>
+                    <span>Timings: From {doctor.availableTimeStart} to {doctor.availableTimeEnd}</span>
                   </div>
                 </div>
                 
@@ -256,6 +257,7 @@ const DoctorFinder = () => {
                 </div>
                 
                 <p className="mt-4 text-gray-600 line-clamp-2">
+                  Description : <span> </span>
                   {doctor.bio}
                 </p>
                 
@@ -291,7 +293,7 @@ const DoctorFinder = () => {
       <footer className="mt-12 border-t border-gray-200 bg-white/80 backdrop-blur-lg py-8">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center text-gray-500 text-sm">
-            <p>© 2025 HealthConnect. All rights reserved.</p>
+            <p>© 2025 Mediseek.ai All rights reserved.</p>
             <p className="mt-1">Finding the right healthcare professional made simple.</p>
           </div>
         </div>

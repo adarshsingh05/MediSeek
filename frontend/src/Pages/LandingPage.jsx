@@ -16,6 +16,35 @@ const LandingPage = () => {
   const [userName, setUserName] = useState(null); // State to store user's name
   const [patientName, setPatientName] = useState(""); // New state for patient name
   const [testReport, setTestReport] = useState(""); // New state for test report
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/auth/user", {
+          withCredentials: true, // Ensures cookies (like auth tokens) are sent with the request
+        });
+
+        console.log("Full API Response:", response.data); // Logs everything from the response
+
+        // Assuming the API returns these fields
+        const { username, role, email, ...otherDetails } = response.data;
+        
+        setUserData(response.data); // Store user data in state
+
+        console.log("User Details:");
+        console.log("Username:", username);
+        console.log("Role:", role);
+        console.log("Email:", email);
+        console.log("Other Details:", otherDetails);
+      } catch (error) {
+        console.error("Error fetching user details:", error.response?.data || error.message);
+      }
+    };
+
+    fetchUserDetails(); // Call API when page loads
+  }, []);
+
 
   useEffect(() => {
     // Fetch user name from localStorage or any other global state if logged in
@@ -101,6 +130,8 @@ const LandingPage = () => {
 
     setIsUploading(false); // Stop Loader
 };
+
+
 
   const handleLogout = async () => {
     try {

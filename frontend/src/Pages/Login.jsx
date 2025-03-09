@@ -17,13 +17,14 @@ const Login = () => {
         email,
         password,
       }, { withCredentials: true });
-
+      console.log('data user',response.data);
       // Ensure the backend sends both token and username
       if (response.data.token && response.data.username) {
         // Store the token and username in localStorage
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("username", response.data.username);
         localStorage.setItem("role", response.data.role);
+        localStorage.setItem("email", response.data.email);
         
         // Redirect to Dashboard after login
         navigate("/");

@@ -2,6 +2,7 @@ import { useState } from "react";
 import DashboardUI from "./dsectionone";
 import { useEffect } from "react";
 import axios from "axios";
+import DoctorHistoryUI from "./doctorhistorydash";
 
 export default function Dashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -53,7 +54,7 @@ export default function Dashboard() {
           <ul>
             <li className={`p-2 rounded-lg cursor-pointer flex flex-row  ${activeSection === 'dashboard' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('dashboard')}><img className="mr-3 ml-2 w-5 h-5.5" src='/home.svg'></img>Dashboard</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'reports' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('reports')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/Path.svg'></img>EHR Analysis</li>
-            <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'goals' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('goals')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/he.svg'></img>  Goals</li>
+            <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'Doctorhistory' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('Doctorhistory')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/he.svg'></img>  Doctor History</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'reminders' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('reminders')}><img className="mr-3 ml-2 w-6 h-6" src='/cal.svg'></img>Reminders</li>
             <li className={`p-2 rounded-lg mt-2 cursor-pointer flex flex-row ${activeSection === 'settings' ? 'bg-blue-600' : ''}`} onClick={() => handleNavigation('settings')}> <img className="mr-3 ml-2 w-5 h-5.5" src='/Settings.svg'></img>Settings</li>
           </ul>
@@ -95,13 +96,16 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold">Reports</h2>
             <p className="mt-2">This is the Reports section with dummy data.</p>
           </div>
+          
         </section>
         
+        
         {/* Goals Section */}
-        <section id="goals" className="min-h-screen flex items-center justify-center">
+        <section id="Doctorhistory" className="min-h-screen flex items-center justify-center">
           <div>
-            <h2 className="text-xl font-bold">Goals</h2>
-            <p className="mt-2">This is the Goals section with dummy data.</p>
+            
+            <DoctorHistoryUI/>
+            
           </div>
         </section>
         
