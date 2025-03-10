@@ -5,7 +5,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User.js");
 const nodemailer = require("nodemailer");
 const Doctor = require("../models/doctors.js");
-
+const sharedDocSchema = require("../models/SharedDoc.js");
+const connection = require("../models/connection.js");
 
 // Email Transporter
 const transporter = nodemailer.createTransport({
@@ -173,17 +174,92 @@ const doctorredgdone = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+const shareddoc = async (req, res) => {
+  try {
+    const { userId, docId, supabaseUrl } = req.body;
+
+    // Ensure input is valid
+    if (!docId || !userId|| !supabaseUrl) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    // Store in DB
+    await sharedDocSchema.create({ userId, docId, supabaseUrl });
+    res.json({ message: 'Document shared successfully' });
+} catch (err) {
+    res.status(500).json({ error: 'Server error' });
+}
+}
 
 
+// doctor to get shared data
+
+const getshareddoc = async (req, res) => {
+  try {
+      const { docId } = req.params;
+
+      // Ensure input is valid
+      if (!docId) {
+          return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Get shared documents
+      const sharedDocs = await sharedDocSchema.find({ docId });
+      res.json({ sharedDocs });
+  } catch (err) {
+      res.status(500).json({ error: 'Server error' });
+  }
+}
+
+const docconnection = async (req,res) => {
+  const { docEmail, userEmail, userAccepted } = req.body;
+
+  try {
+    const newDoc = new connection({
+      docEmail,
+      userEmail,
+      userAccepted,
+      docAccepted: false,
+    });
+
+    await newDoc.save();
+    res.status(201).json({ message: "Request submitted", data: newDoc });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+
+}
+
+const accept  = async (req,res) => {
+  const { docEmail, userEmail } = req.body;
+
+  try {
+    const doc = await connection.findOneAndUpdate(
+      { docEmail, userEmail },
+      { docAccepted: true },
+      { new: true }
+    );
+    if (!doc) {
+      return res.status(404).json({ message: "Record not found" });
+    }
+
+    res.json({ message: "Request approved", doc });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }}
 
 // Export all functions
 module.exports = {
     register,
+    docconnection,
+    accept,
     doctorredgdone,
     verifyEmail,
     login,
     logout,
     authMiddleware,
     doctorRedg,
+    shareddoc,
+    getshareddoc,
   };
 
