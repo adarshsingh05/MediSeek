@@ -248,9 +248,25 @@ const accept  = async (req,res) => {
     res.status(500).json({ error: error.message });
   }}
 
+  const getreq = async(req,res)=>{
+    const { docEmail } = req.body;
+
+  try {
+    const requests = await connection.find({ docEmail });
+
+    if (requests.length === 0) {
+      return res.status(404).json({ message: "No requests found for this doctor" });
+    }
+
+    res.status(200).json({ requests });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+  }
 // Export all functions
 module.exports = {
     register,
+    getreq,
     docconnection,
     accept,
     doctorredgdone,

@@ -1,13 +1,17 @@
 import React from 'react';
 import { Search, MapPin, Calendar, Clock, Star, Heart, MessageSquare, Filter, ArrowRight, Check, User } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const DoctorFinder = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [favorite, setFavorite] = useState({});
   const [name, setName] = useState("");
+  const [docEmail, setDocEmail] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [activeFilter, setActiveFilter] = useState('all');
+  const [connect, setConnect] = useState(false);
   
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -27,6 +31,29 @@ const DoctorFinder = () => {
 
     fetchDoctors();
   }, []);
+  
+  const handleConnect = async (email) => {
+    const userEmail = localStorage.getItem("email"); // Get user email directly
+  
+    if (!userEmail) {
+      alert("User email not found! Please log in.");
+      return;
+    }
+  
+    try {
+      const response = await axios.post("http://localhost:5000/api/auth/docconnection", {
+        docEmail: email,
+        userEmail: userEmail, // Use directly
+        userAccepted: true, // or false based on user interaction
+      });
+  
+      console.log("Response:", response.data);
+      alert("Request submitted successfully!");
+    } catch (error) {
+      console.error("Error:", error.response?.data || error.message);
+      alert("Failed to submit request.");
+    }
+  };
   
 
   const toggleFavorite = (doctorId) => {
@@ -262,9 +289,9 @@ const DoctorFinder = () => {
                 </p>
                 
                 <div className="mt-5 grid grid-cols-7 gap-3">
-                  <button className="col-span-3 bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-all hover:scale-105">
+                  <button onClick={() => handleConnect(doctor.email)} className="col-span-3 bg-white border border-blue-500 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-all hover:scale-105">
                     <Calendar className="h-4 w-4 mr-2" />
-                    Book
+                    Connect
                   </button>
                   <button className="col-span-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center font-medium transition-all hover:scale-105 shadow-sm hover:shadow">
                     <MessageSquare className="h-4 w-4 mr-2" />

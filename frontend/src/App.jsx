@@ -10,6 +10,7 @@ import VaultPage from './Pages/Vault';
 import ChatWidget from './Pages/chatui';
 import DoctorsPage from './Pages/doctors';
 import DoctorRegistration from './Pages/doctorredg';
+import DoctorDashboard from './Pages/yourpatient';
 
 const App = () => {
   return (
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/chat" element={<ChatWidget/>}></Route>
           <Route path="/doctors" element={<DoctorsPage/>}></Route>
           <Route path="/doctorsredg" element={<DoctorRegistration/>}></Route>
+          <Route path="/patients" element={<DoctorDashboard/>}></Route>
         </Routes>
       </div>
     </Router>
