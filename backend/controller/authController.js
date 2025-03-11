@@ -249,7 +249,7 @@ const accept  = async (req,res) => {
   }}
 
   const getreq = async(req,res)=>{
-    const { docEmail } = req.body;
+    const { docEmail } = req.query;
 
   try {
     const requests = await connection.find({ docEmail });

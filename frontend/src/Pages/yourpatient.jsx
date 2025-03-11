@@ -1,39 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { MessageSquare, Calendar, Users, Bell, Settings, Search, Send, Video, Phone, Plus, FileText, Clock } from 'lucide-react';
-
+import React, { useState, useEffect } from "react";
+import { MessageSquare, Calendar, Users, Bell, Settings, Search, Send, Video, Phone, Plus, FileText, Clock } from "lucide-react";
+import axios from "axios";
 const DoctorDashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [email,setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Step 1: Get email from localStorage on mount
   useEffect(() => {
-    
- 
-    console.log('startig')
-      const fetchreq = async () => {
-       
+    const storedEmail = localStorage.getItem("email") || "";
+    setEmail(storedEmail);
+    console.log("Email retrieved:", storedEmail);
+  }, []); // Runs only once when the component mounts
 
-        try {
-            console.log('trying fetch')
-          const response = await fetch("http://localhost:5000/api/auth/getreq",{email});
-          if (!response.ok) throw new Error("Failed to fetch doctors");
-          
-          const data = await response.json();
-      
-          console.log(data);
-        } catch (error) {
-          console.error("Error fetching doctors:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
+ // Fetch data from API
+ useEffect(() => {
+  if (!email) {
+    console.log("Email is empty, skipping fetch");
+    return; // Prevent API call if email is not set
+  }
+
+  const fetchRequests = async () => {
+    setLoading(true);
+    try {
+      console.log("Fetching requests for email:", email);
+
+      const response = await axios.get("http://localhost:5000/api/auth/getreq", {
+        params: { docEmail: email }  // Send email as a query parameter
+      });
+
+
+      console.log("Fetched data:", response.data);
+      setRequests(response.data);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRequests();
+}, [email]);
+
   
-      fetchreq();
-    }, []);
-    
+
+  // Step 3: Handle loading screen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
   
   // Simpler sample data
   const connectionRequests = [
@@ -46,18 +67,10 @@ const DoctorDashboard = () => {
     { id: 2, name: 'Linda Davis', condition: 'Diabetes', image: '/api/placeholder/64/64', online: false }
   ];
 
-  // Animation effect on load
-  useEffect(() => {
-   
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
+ 
+  
   if (isLoading) {
-    setEmail(localStorage.getItem('email'));
-    console.log("emails",email);
+
     return (
       <div className="h-screen w-full flex items-center justify-center bg-gradient-to-r from-teal-400 to-blue-300">
         <div className="text-center">
