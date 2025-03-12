@@ -269,6 +269,7 @@ const getdocdetails = async (req, res) => {
 
     // Find all connection records for the given user
     const connections = await connection.find({ userEmail });
+   
 
     if (!connections || connections.length === 0) {
       return res.status(404).json({ message: "No connections found" });

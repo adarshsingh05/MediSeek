@@ -109,22 +109,7 @@ const DoctorDashboard = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const patients = [
-    {
-      id: 1,
-      name: "Robert Brown",
-      condition: "Hypertension",
-      image: "/api/placeholder/64/64",
-      online: true,
-    },
-    {
-      id: 2,
-      name: "Linda Davis",
-      condition: "Diabetes",
-      image: "/api/placeholder/64/64",
-      online: false,
-    },
-  ];
+
 
   if (isLoading) {
     return (
