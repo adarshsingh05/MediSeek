@@ -37,7 +37,7 @@ const SignupModal = ({ isOpen, onClose }) => {
       if (!response.ok) throw new Error(data.message || "Signup failed");
 
       setShowSuccess(true);
-      setFormData({ name: "", email: "", password: "", role: "User" });
+      setFormData({ name: "", email: "", password: "", role: role });
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -149,8 +149,10 @@ const SignupModal = ({ isOpen, onClose }) => {
               disabled={loading}
               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="User">Doctor</option>
-              <option value="Recruiter">Patient</option>
+              <option value="None">None</option>
+
+              <option value="doctor">Doctor</option>
+              <option value="patient">Patient</option>
             </select>
 
             <button

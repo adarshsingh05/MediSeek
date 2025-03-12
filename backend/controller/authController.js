@@ -259,6 +259,44 @@ const accept = async (req, res) => {
 };
 
 
+const getdocdetails = async (req, res) => {
+  try {
+    const { userEmail } = req.body;
+
+    if (!userEmail) {
+      return res.status(400).json({ message: "User email is required" });
+    }
+
+    // Find all connection records for the given user
+    const connections = await connection.find({ userEmail });
+
+    if (!connections || connections.length === 0) {
+      return res.status(404).json({ message: "No connections found" });
+    }
+
+    // Extract all doctor emails from the connections
+    const doctorEmails = connections.map(conn => conn.docEmail);
+
+    if (!doctorEmails.length) {
+      return res.status(404).json({ message: "No doctors associated with this user" });
+    }
+
+    // Fetch details of all connected doctors
+    const doctors = await Doctor.find({ email: { $in: doctorEmails } });
+
+    if (!doctors || doctors.length === 0) {
+      return res.status(404).json({ message: "No doctor details found" });
+    }
+
+    res.json(doctors);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
   const getreq = async(req,res)=>{
     const { docEmail } = req.query;
 
@@ -288,5 +326,6 @@ module.exports = {
     doctorRedg,
     shareddoc,
     getshareddoc,
+    getdocdetails
   };
 

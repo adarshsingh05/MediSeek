@@ -1,71 +1,69 @@
 import React, { useState } from "react";
-
+import axios from "axios";
+import { useEffect } from "react";
 const DoctorHistoryUI = () => {
   const [filterStatus, setFilterStatus] = useState("all");
-  
+  const [userEmail, setUserEmail] = useState("");
+  const [doctor, setDoctor] = useState([]);
+  const [error, setError] = useState("");
   // Sample doctor interaction data
-  const doctorInteractions = [
-    {
-      id: 1,
-      doctorName: "Dr. Sarah Johnson",
-      specialty: "Cardiologist",
-      date: "February 15, 2025",
-      time: "10:30 AM",
-      location: "Heart Care Center",
+
+const emailpass = localStorage.getItem("email"); // Fetch email from localStorage
+
+  useEffect(() => {
+    const fetchDoctorDetails = async () => {
+      try {
+        setError(""); // Clear previous errors
+
+        const response = await axios.post("http://localhost:5000/api/auth/getdocdetails", {
+          userEmail: emailpass,
+        });
+
+        console.log("API Response:", response.data);
+        setDoctor(response.data); 
+      } catch (err) {
+        setDoctor(null);
+        setError(err.response?.data?.message || "Something went wrong");
+      }
+    };
+
+    if (emailpass) {
+      fetchDoctorDetails(); // Fetch data when email is available
+    }
+  }, [emailpass]); // Re-fetch only if email changes
+
+  useEffect(() => {
+    console.log("Updated doctor state:", doctor);
+  }, [doctor]); // Logs when doctor state updates
+
+
+  // const doctorInteractions = doctor.map(doctor => ({
+  //   id: doctor._id,
+  //   doctorName: doctor.name || "Dr. John Doe",
+  //   specialty: doctor.specialty || "Not Given",
+  //   date: doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : "Not Given",
+  //   time: doctor.createdAt ? new Date(doctor.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : "10:30 AM",
+  //   location: doctor.location || "Not Given",
+  //   status: "completed",
+  //   notes: doctor.bio || "Not Given",
+  //   prescriptions: ["Lisinopril 10mg", "Aspirin 81mg"], // You can dynamically fetch this if needed
+  //   followUp: "3 months"
+  // }));
+
+  const doctorInteractions = doctor.map(doctor => ({
+    
+      id: doctor?._id,
+      doctorName: doctor?.name || "Dr. John Doe",
+      specialty: doctor?.specialty || "Note Given",
+      date: doctor?.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : "Not Given",
+    time: doctor?.createdAt ? new Date(doctor.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) : "10:30 AM",
+      location: doctor?.location || "Note Given",
       status: "completed",
-      notes: "Regular checkup. Blood pressure slightly elevated. Recommended reducing sodium intake and increasing physical activity.",
+      notes: doctor?.bio || "Note Given",
       prescriptions: ["Lisinopril 10mg", "Aspirin 81mg"],
       followUp: "3 months"
-    },
-    {
-      id: 2,
-      doctorName: "Dr. Michael Chen",
-      specialty: "Neurologist",
-      date: "January 23, 2025",
-      time: "2:15 PM",
-      location: "Neurology Associates",
-      status: "completed",
-      notes: "Patient reported occasional headaches. MRI results normal. Recommended keeping a headache journal.",
-      prescriptions: ["Sumatriptan 50mg (as needed)"],
-      followUp: "6 months"
-    },
-    {
-      id: 3,
-      doctorName: "Dr. Robert Williams",
-      specialty: "Orthopedic Surgeon",
-      date: "March 12, 2025",
-      time: "9:00 AM",
-      location: "Orthopedic Specialists",
-      status: "upcoming",
-      notes: "Pre-surgical consultation for knee arthroscopy.",
-      prescriptions: [],
-      followUp: "Post-surgery"
-    },
-    {
-      id: 4,
-      doctorName: "Dr. Emily Patel",
-      specialty: "Endocrinologist",
-      date: "December 10, 2024",
-      time: "11:45 AM",
-      location: "Endocrine Health Center",
-      status: "completed",
-      notes: "Annual thyroid checkup. TSH levels normal. Continuing current medication regimen.",
-      prescriptions: ["Levothyroxine 75mcg"],
-      followUp: "12 months"
-    },
-    {
-      id: 5,
-      doctorName: "Dr. James Wilson",
-      specialty: "Dermatologist",
-      date: "March 22, 2025",
-      time: "3:30 PM",
-      location: "Dermatology Clinic",
-      status: "upcoming",
-      notes: "Appointment for annual skin check.",
-      prescriptions: [],
-      followUp: "TBD"
-    }
-  ];
+    
+  }));
   
   // Filter interactions based on status
   const filteredInteractions = filterStatus === "all" 
@@ -76,7 +74,7 @@ const DoctorHistoryUI = () => {
   const sortedInteractions = [...filteredInteractions].sort((a, b) => new Date(b.date) - new Date(a.date));
   
   return (
-    <div className="mt-8">
+    <div className="mt-8 mr-3 w-[950px] mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Doctors' History</h2>
         <div className="flex gap-4">
