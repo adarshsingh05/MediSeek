@@ -212,10 +212,11 @@ const getshareddoc = async (req, res) => {
 }
 
 const docconnection = async (req,res) => {
-  const { docEmail, userEmail, userAccepted } = req.body;
+  const {username, docEmail, userEmail, userAccepted } = req.body;
 
   try {
     const newDoc = new connection({
+      username,
       docEmail,
       userEmail,
       userAccepted,
@@ -225,6 +226,7 @@ const docconnection = async (req,res) => {
     await newDoc.save();
     res.status(201).json({ message: "Request submitted", data: newDoc });
   } catch (error) {
+    console.log("error", error);
     res.status(500).json({ error: error.message });
   }
 

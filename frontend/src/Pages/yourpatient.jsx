@@ -207,7 +207,7 @@ const DoctorDashboard = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800">
-                    {request.userEmail}
+                    {request.username|| request.userEmail}
                   </h3>
                   <p className="text-sm text-blue-500">{requests.condition}</p>
                   <div className="flex items-center mt-1">
@@ -429,15 +429,18 @@ const DoctorDashboard = () => {
               </p>
               <div className="grid grid-cols-3 gap-4 mb-8">
                 <div className="p-4 bg-blue-50 rounded-xl text-center">
-                  <h3 className="text-3xl font-bold text-teal-600">12</h3>
+                  <h3 className="text-3xl font-bold text-teal-600">{requests.filter((req)=> req.docAccepted).length}</h3>
                   <p className="text-sm text-gray-600">Patients</p>
                 </div>
                 <div className="p-4 bg-blue-50 rounded-xl text-center">
-                  <h3 className="text-3xl font-bold text-teal-600">5</h3>
+                  <h3 className="text-3xl font-bold text-teal-600">{requests.filter((req)=> req.docAccepted).length}</h3>
                   <p className="text-sm text-gray-600">Appointments</p>
                 </div>
                 <div className="p-4 bg-blue-50 rounded-xl text-center">
-                  <h3 className="text-3xl font-bold text-teal-600">2</h3>
+                  <h3 className="text-3xl font-bold text-teal-600">
+                  {requests.filter((req) => req.docAccepted)===true.length > 0 
+  ? `${requests.filter((req) => req.docAccepted).length} new requests` 
+  : 0}                     </h3>
                   <p className="text-sm text-gray-600">Requests</p>
                 </div>
               </div>
@@ -454,7 +457,7 @@ const DoctorDashboard = () => {
             <Calendar size={20} />
           </div>
           <div>
-            <p className="text-sm font-semibold">Appointment Reminder</p>
+            <p className="text-sm text-gray-500 font-semibold">Appointment Reminder</p>
             <p className="text-xs text-blue-500">
               Video call with James Wilson in 15 minutes
             </p>
@@ -468,7 +471,7 @@ const DoctorDashboard = () => {
             <input
               type="text"
               placeholder="Search patients..."
-              className="w-full py-3 pl-10 pr-4 rounded-lg bg-blue-50 focus:outline-none focus:ring-2 focus:ring-teal-400 border border-blue-100"
+              className="w-full text-gray-600 py-3 pl-10 pr-4 rounded-lg bg-blue-50 focus:outline-none focus:ring-2 focus:ring-teal-400 border border-blue-100"
             />
             <Search
               size={18}
@@ -485,12 +488,12 @@ const DoctorDashboard = () => {
         </div>
 
         <div className="overflow-y-auto flex-1">
-          {patients.map((patient) => (
+          {requests.map((request) => (
             <div
-              key={patient.id}
-              onClick={() => setSelectedPatient(patient)}
+              key={request._id}
+              onClick={() => setSelectedPatient(request)}
               className={`p-5 border-b border-blue-100 hover:bg-blue-50 cursor-pointer transition-colors ${
-                selectedPatient?.id === patient.id
+                selectedPatient?.id === request._id
                   ? "bg-blue-50 border-l-4 border-l-teal-500"
                   : ""
               }`}
@@ -498,29 +501,29 @@ const DoctorDashboard = () => {
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <img
-                    src={patient.image}
-                    alt={patient.name}
+                    src={request.image}
+                    alt={request.username}
                     className="w-14 h-14 rounded-lg object-cover shadow-sm"
                   />
                   <span
                     className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-md border-2 border-white ${
-                      patient.online ? "bg-teal-400" : "bg-gray-300"
+                      request.online ? "bg-teal-400" : "bg-gray-300"
                     }`}
                   ></span>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-800">
-                    {patient.name}
+                    {request.username || request.userEmail}
                   </h3>
-                  <p className="text-sm text-blue-500">{patient.condition}</p>
+                  <p className="text-sm text-blue-500">{request.condition}</p>
                   <div className="flex items-center mt-1">
                     <span
                       className={`w-2 h-2 rounded-full ${
-                        patient.online ? "bg-teal-400" : "bg-gray-400"
+                        request.online ? "bg-teal-400" : "bg-gray-400"
                       } mr-2`}
                     ></span>
                     <span className="text-xs text-gray-500">
-                      {patient.online ? "Online now" : "Last seen 2h ago"}
+                      {request.online ? "Online now" : "Last seen 2h ago"}
                     </span>
                   </div>
                 </div>

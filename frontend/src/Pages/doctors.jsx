@@ -34,16 +34,24 @@ const DoctorFinder = () => {
   
   const handleConnect = async (email) => {
     const userEmail = localStorage.getItem("email"); // Get user email directly
-  
+    const username = localStorage.getItem("username");
+    console.log("userEmail ::",userEmail);
+    console.log("username ::",username);
     if (!userEmail) {
       alert("User email not found! Please log in.");
+      return;
+    }
+    if (!username) {
+      alert("User name not found! Please log in.");
+      console.log("username ::",username);
       return;
     }
   
     try {
       const response = await axios.post("http://localhost:5000/api/auth/docconnection", {
+        username: username,  // Change 'name' to 'username'
         docEmail: email,
-        userEmail: userEmail, // Use directly
+        userEmail: userEmail,
         userAccepted: true, // or false based on user interaction
       });
   
