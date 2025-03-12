@@ -230,23 +230,32 @@ const docconnection = async (req,res) => {
 
 }
 
-const accept  = async (req,res) => {
+const accept = async (req, res) => {
   const { docEmail, userEmail } = req.body;
 
+  console.log("Received Data:", { docEmail, userEmail });
+
   try {
-    const doc = await connection.findOneAndUpdate(
-      { docEmail, userEmail },
-      { docAccepted: true },
-      { new: true }
-    );
+    const doc = await connection.findOne({ docEmail, userEmail });
+    console.log("Record Found in DB:", doc);
+
     if (!doc) {
       return res.status(404).json({ message: "Record not found" });
     }
 
-    res.json({ message: "Request approved", doc });
+    // If record is found, update it
+    const updatedDoc = await connection.findOneAndUpdate(
+      { docEmail, userEmail },
+      { docAccepted: true },
+      { new: true }
+    );
+
+    res.json({ message: "Request approved", updatedDoc });
   } catch (error) {
     res.status(500).json({ error: error.message });
-  }}
+  }
+};
+
 
   const getreq = async(req,res)=>{
     const { docEmail } = req.query;
