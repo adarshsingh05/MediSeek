@@ -6,8 +6,11 @@ import { useEffect } from "react";
 import { handleprescriptionUpload } from "./fileuploadhandler";
 import { handleLabUpload } from "./fileuploadhandler";
 import { handleFileUpload } from "./fileuploadhandler";
+import DoctorDetails from "./docmodal";
+import { useRef } from "react";
 const VaultPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const showDoctorDetailsRef = useRef(null);
   const [pres, setPres] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [DocumentName, setDocumentName] = useState(""); // New state for patient name
@@ -205,7 +208,7 @@ const VaultPage = () => {
                   <p className="text-xs text-gray-500">{pres.hospitalName}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Share2 className="text-blue-500 cursor-pointer" />
+                  <Share2  onClick={() => showDoctorDetailsRef.current && showDoctorDetailsRef.current()} className="text-blue-500 cursor-pointer" />
                   <Download className="text-green-500 cursor-pointer" />
                   <Eye className="text-gray-500 cursor-pointer" />
                 </div>
@@ -237,7 +240,7 @@ const VaultPage = () => {
                   {/* Right Side: Icons (View, Share, Download) */}
                   <div className="flex gap-2">
                     <Eye className="text-gray-500 cursor-pointer" />
-                    <Share2 className="text-blue-500 cursor-pointer" />
+                    <Share2  onClick={() => showDoctorDetailsRef.current && showDoctorDetailsRef.current()} className="text-blue-500 cursor-pointer" />
                     <Download className="text-green-500 cursor-pointer" />
                   </div>
                 </div>
@@ -307,7 +310,7 @@ const VaultPage = () => {
                   <p className="text-xs text-gray-500">{pres.hospitalName}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Share2 className="text-blue-500 cursor-pointer" />
+                  <Share2  onClick={() => showDoctorDetailsRef.current && showDoctorDetailsRef.current()} className="text-blue-500 cursor-pointer" />
                   <Download className="text-green-500 cursor-pointer" />
                   <Eye className="text-gray-500 cursor-pointer" />
                 </div>
@@ -349,7 +352,11 @@ const VaultPage = () => {
                   {/* Right Side: Icons (View, Share, Download) */}
                   <div className="flex gap-2">
                     <Eye className="text-gray-500 cursor-pointer" />
-                    <Share2 className="text-blue-500 cursor-pointer" />
+
+      {/* Pass function reference to DoctorDetails */}
+                    <Share2  onClick={() => showDoctorDetailsRef.current && showDoctorDetailsRef.current()} className="text-blue-500 cursor-pointer" />
+                    <DoctorDetails refFunction={(fn) => (showDoctorDetailsRef.current = fn)} />
+
                     <Download className="text-green-500 cursor-pointer" />
                   </div>
                 </div>
@@ -395,8 +402,8 @@ const VaultPage = () => {
                   {/* Right Side: Icons (View, Share, Download) */}
                   <div className="flex gap-2">
                     <Eye className="text-gray-500 cursor-pointer" />
-                    <Share2 className="text-blue-500 cursor-pointer" />
-                    <Download className="text-green-500 cursor-pointer" />
+ <Share2  onClick={() => showDoctorDetailsRef.current && showDoctorDetailsRef.current()} className="text-blue-500 cursor-pointer" />
+                    <DoctorDetails refFunction={(fn) => (showDoctorDetailsRef.current = fn)} />                    <Download className="text-green-500 cursor-pointer" />
                   </div>
                 </div>
               ))

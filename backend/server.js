@@ -16,6 +16,7 @@ app.use(
     credentials: true, // Allow cookies and authentication headers
   })
 );
+app.use(express.json()); // ✅ Middleware to parse JSON bodies
 
 app.use(bodyParser.json());
 

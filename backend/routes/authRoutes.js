@@ -11,7 +11,7 @@ router.post('/checkdoctorisreg',doctorredgdone);
 router.post('/uploadshareddoc',shareddoc);
 router.post('/docconnection',docconnection);
 router.patch('/accept',accept);
-router.get('/getshareddoc/:docId',getshareddoc);
+router.get('/getshareddoc',getshareddoc);
 router.get('/getreq',getreq);
 router.post('/getdocdetails',getdocdetails);
 module.exports = router;

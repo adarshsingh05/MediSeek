@@ -16,6 +16,38 @@ const pdf = require('html-pdf');
 const Doctor = require('../models/doctors');
 
 // 📌 API to Save Report Metadata in MongoDB
+
+// GET all reports using userId from req.body
+router.post("/all-reports", async (req, res) => {
+  try {
+    const { userId } = req.body; // Extract userId from request body
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Fetch all reports for the provided userId
+    const [reports, prescriptions, labReports, scans, medicalBills] = await Promise.all([
+      Report.find({ userId }),
+      Prescription.find({ userId }),
+      LabReport.find({ userId }),
+      Scan.find({ userId }),
+    ]);
+
+    res.json({
+      reports,
+      prescriptions,
+      labReports,
+      scans,
+      medicalBills,
+    });
+  } catch (error) {
+    console.error("Error fetching all reports:", error);
+    res.status(500).json({ message: "Failed to fetch reports" });
+  }
+});
+
+
 router.post('/upload',authMiddleware, async (req, res) => {
     try {
         console.log("User from token:", req.user);

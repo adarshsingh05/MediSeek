@@ -28,6 +28,10 @@ const LandingPage = () => {
         console.log("Full API Response:", response.data); // Logs everything from the response
 
         // Assuming the API returns these fields
+
+         // Extract only userId from API response
+      const { userId } = response.data; // Assuming the backend sends { userId: "some-id" }
+      console.log("Extracted User ID:", userId);
         const { username, role, email, ...otherDetails } = response.data;
         
         setUserData(response.data); // Store user data in state

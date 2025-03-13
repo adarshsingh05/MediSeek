@@ -87,9 +87,7 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-
-// Login User
- const login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -101,18 +99,23 @@ const verifyEmail = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id }, 'adarsh1234', { expiresIn: "1d" });
+    // Generate JWT with user ID
+    const token = jwt.sign({ id: user._id }, "adarsh1234", { expiresIn: "1d" });
 
+    // Send response with token and user details
     res.cookie("token", token, { httpOnly: true }).json({
       message: "Login successful",
       token,
-      username: user.name, // Send the username as well
-      role: user.role, // Send the username as well
-      email: user.email
-    });  } catch (err) {
+      username: user.name,
+      role: user.role,
+      email: user.email,
+      userId: user._id, // Send user ID directly
+    });
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 const logout = (req, res) => {
   try {
     // Clear the token cookie
@@ -185,7 +188,7 @@ const shareddoc = async (req, res) => {
 
     // Store in DB
     await sharedDocSchema.create({ userId, docId, supabaseUrl });
-    res.json({ message: 'Document shared successfully' });
+    res.json({ success: true, message: 'Document shared successfully' });    console.log("Document shared successfully");
 } catch (err) {
     res.status(500).json({ error: 'Server error' });
 }
@@ -196,7 +199,7 @@ const shareddoc = async (req, res) => {
 
 const getshareddoc = async (req, res) => {
   try {
-      const { docId } = req.params;
+      const { docId } = req.body;
 
       // Ensure input is valid
       if (!docId) {
@@ -261,7 +264,8 @@ const accept = async (req, res) => {
 
 const getdocdetails = async (req, res) => {
   try {
-    const { userEmail } = req.body;
+    const { email: userEmail } = req.body;  // Rename `email` to `userEmail`
+    console.log("Received request body:", req.body); // 🔍 Debug
 
     if (!userEmail) {
       return res.status(400).json({ message: "User email is required" });
@@ -313,6 +317,8 @@ const getdocdetails = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
   }
+
+
 // Export all functions
 module.exports = {
     register,

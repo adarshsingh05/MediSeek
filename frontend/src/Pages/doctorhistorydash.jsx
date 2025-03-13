@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { 
-  EyeIcon, 
-  PencilIcon, 
+import {
+  EyeIcon,
+  PencilIcon,
   ArrowDownTrayIcon,
   CalendarDaysIcon,
   MapPinIcon,
@@ -14,18 +14,27 @@ import {
   UserIcon,
   StarIcon,
   BuildingOfficeIcon,
-  PhoneIcon
+  PhoneIcon,
+  ShareIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 const DoctorHistoryUI = () => {
   const [filterStatus, setFilterStatus] = useState("all");
+  const [activeTab, setActiveTab] = useState("labReports");
+
   const [doctor, setDoctor] = useState([]);
   const [error, setError] = useState("");
   const [expandedId, setExpandedId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  
+  const [showReportsModal, setShowReportsModal] = useState(false);
+  const [reports, setReports] = useState([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [reportError, setReportError] = useState("");
+const [docid, setDocId] = useState("");
   const emailpass = localStorage.getItem("email");
+  const userids = localStorage.getItem("userId") || "";
 
   useEffect(() => {
     const fetchDoctorDetails = async () => {
@@ -35,11 +44,12 @@ const DoctorHistoryUI = () => {
 
         const response = await axios.post(
           "http://localhost:5000/api/auth/getdocdetails",
-          { userEmail: emailpass }
+          { email: emailpass }
         );
 
         console.log("API Response:", response.data);
         setDoctor(response.data);
+       
         setIsLoading(false);
       } catch (err) {
         setDoctor([]);
@@ -53,8 +63,41 @@ const DoctorHistoryUI = () => {
     }
   }, [emailpass]);
 
+  const fetchReports = async (doctorIds) => {
+    try {
+      
+      const id = localStorage.getItem("userId");
+      console.log("User ID:", id);
+      console.log("Doctor ID for fetching reports:", doctorIds);
+      setDocId(doctorIds);
+      console.log("setted doc id", docid);
+      
+            setIsLoadingReports(true);
+      setReportError("");
+
+      const response = await axios.post(
+        "http://localhost:5000/api/reports/all-reports",
+        { userId: id }
+      );
+
+      console.log("Reports API Response:", response.data);
+      setReports(response.data);
+      setShowReportsModal(true);
+      setIsLoadingReports(false);
+      
+    } catch (err) {
+      setReportError(err.response?.data?.message || "Failed to fetch reports");
+      setIsLoadingReports(false);
+      // Show modal anyway to display the error
+      setShowReportsModal(true);
+    }
+  };
+  useEffect(() => {
+    console.log("Updated docId:", docid);
+  }, [docid])
+
   const doctorInteractions = doctor.map((doctor) => ({
-    id: doctor?._id || Math.random().toString(36).substr(2, 9),
+    id: doctor?._id || Math.random().toString(36).substr(2, 9)||'ss5000',
     doctorName: doctor?.name || "Dr. John Doe",
     specialty: doctor?.specialty || "Not Given",
     date: doctor?.createdAt
@@ -75,20 +118,32 @@ const DoctorHistoryUI = () => {
     doctorEmail: doctor?.email
       ? `${doctor.email.slice(0, 3)}...${doctor.email.slice(-9)}`
       : "Not Given",
-    profileImage: doctor?.profileImage || `https://ui-avatars.com/api/?name=${doctor?.name || 'Doctor'}&background=0D8ABC&color=fff`,
+    profileImage:
+      doctor?.profileImage ||
+      `https://ui-avatars.com/api/?name=${
+        doctor?.name || "Doctor"
+      }&background=0D8ABC&color=fff`,
     rating: doctor?.rating || Math.floor(Math.random() * 2) + 4,
-    phone: doctor?.phone || "+1 (555) 123-4567"
+    phone: doctor?.phone || "+1 (555) 123-4567",
   }));
+
+  
 
   // Filter interactions based on status and search query
   const filteredInteractions = doctorInteractions
-    .filter(interaction => 
-      filterStatus === "all" || interaction.status === filterStatus
+    .filter(
+      (interaction) =>
+        filterStatus === "all" || interaction.status === filterStatus
     )
-    .filter(interaction => 
-      interaction.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interaction.specialty.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      interaction.location.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (interaction) =>
+        interaction.doctorName
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        interaction.specialty
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        interaction.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
   // Sort by date (most recent first)
@@ -99,15 +154,23 @@ const DoctorHistoryUI = () => {
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
+  const allReports = [
+    ...(reports.labReports || []),
+    ...(reports.prescriptions || []),
+    ...(reports.reports || []),
+    ...(reports.scans || []),
+  ];
 
   // Generate star ratings
   const renderStars = (rating) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <StarIcon 
-          key={i} 
-          className={`h-4 w-4 inline ${i <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-500"}`} 
+        <StarIcon
+          key={i}
+          className={`h-4 w-4 inline ${
+            i <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-500"
+          }`}
         />
       );
     }
@@ -138,8 +201,195 @@ const DoctorHistoryUI = () => {
 
   return (
     <div className="mt-8 mr-3 w-[950px] mx-auto">
+      {/* Reports Modal */}
+      {/* Reports Modal */}
+{showReportsModal && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+    <motion.div
+      className="bg-[#112b5e] rounded-xl p-6 w-full max-w-3xl max-h-[80vh] overflow-auto"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex justify-between items-center mb-6">
-        <motion.h2 
+        <h3 className="text-xl font-bold text-blue-400">
+          Your Medical Reports
+        </h3>
+        <button
+          onClick={() => setShowReportsModal(false)}
+          className="bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-full p-2 transition-colors"
+        >
+          <XMarkIcon className="h-5 w-5" />
+        </button>
+      </div>
+
+      {isLoadingReports ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-blue-400">Loading your reports...</p>
+        </div>
+      ) : reportError ? (
+        <div className="bg-red-900 text-red-200 p-4 rounded-lg">
+          <h3 className="text-lg font-semibold">Error</h3>
+          <p>{reportError}</p>
+        </div>
+      ) : (
+        <>
+          {/* Tab navigation */}
+          <div className="flex flex-wrap gap-2 mb-6 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('labReports')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                activeTab === 'labReports' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-[#1d3b6e] hover:bg-[#2a4d85] text-gray-200'
+              }`}
+            >
+              Lab Reports <span className="bg-[#112b5e] px-2 py-0.5 rounded-full text-xs">{reports.labReports?.length || 0}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('prescriptions')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                activeTab === 'prescriptions' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-[#1d3b6e] hover:bg-[#2a4d85] text-gray-200'
+              }`}
+            >
+              Prescriptions <span className="bg-[#112b5e] px-2 py-0.5 rounded-full text-xs">{reports.prescriptions?.length || 0}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('reports')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                activeTab === 'reports' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-[#1d3b6e] hover:bg-[#2a4d85] text-gray-200'
+              }`}
+            >
+              Reports <span className="bg-[#112b5e] px-2 py-0.5 rounded-full text-xs">{reports.reports?.length || 0}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('scans')}
+              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                activeTab === 'scans' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-[#1d3b6e] hover:bg-[#2a4d85] text-gray-200'
+              }`}
+            >
+              Scans <span className="bg-[#112b5e] px-2 py-0.5 rounded-full text-xs">{reports.scans?.length || 0}</span>
+            </button>
+          </div>
+          
+          {/* Current section title and count */}
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">
+              {activeTab === 'labReports' ? 'Lab Reports' : 
+               activeTab === 'prescriptions' ? 'Prescriptions' :
+               activeTab === 'reports' ? 'Reports' : 'Scans'}
+            </h2>
+            <span className="bg-blue-600 px-3 py-1 rounded-lg text-sm">
+              {reports[activeTab]?.length || 0} items
+            </span>
+          </div>
+          
+          {/* Display active tab content */}
+          {reports[activeTab]?.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4">
+              {reports[activeTab].map((report, index) => (
+                <div
+                  key={report._id || index}
+                  className="bg-[#1d3b6e] p-4 rounded-lg hover:bg-[#2a4d85] transition-colors"
+                >
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-semibold text-lg">
+                        {report.hospitalName || `Unknown Hospital`}
+                      </h4>
+                      <p className="text-sm text-gray-300">
+                        {report.createdAt
+                          ? new Date(report.createdAt).toLocaleDateString()
+                          : "Date not available"}
+                      </p>
+                      <p className="text-sm text-blue-400 mt-1">
+                        {report.doctorName || "Unknown Doctor"}
+                      </p>
+                      {report.reportName && report.reportName !== '[object File]' && (
+                        <p className="text-sm mt-1 text-gray-200">
+                          {report.reportName}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex">
+                    <button
+  id="shareButton"
+  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm flex items-center transition-colors"
+  onClick={async (e) => {
+    try {
+      console.log("docid:", docid);
+      console.log("supabaseUrl:", report.supabaseUrl);
+      console.log("userids:", userids);
+
+      if (!docid || !report.supabaseUrl || !userids) {
+        console.error("Missing necessary data:", { docid, userids });
+        return;
+      }
+
+      console.log("payload", { docid, supabaseUrl: report.supabaseUrl, userids });
+
+      const response = await axios.post(
+        "http://localhost:5000/api/auth/uploadshareddoc",
+        {
+          docId: docid,
+          supabaseUrl: report.supabaseUrl,
+          userId: userids,
+        }
+      );
+
+      if (response.data.success) {
+        console.log("Upload successful");
+        alert("Uploaded successfully");
+
+        // Modify button directly
+        const button = e.target;
+        button.textContent = "Shared";
+        button.classList.remove("bg-blue-600", "hover:bg-blue-700");
+        button.classList.add("bg-green-500", "cursor-not-allowed");
+        button.disabled = true; // Disable the button
+      } else {
+        alert("Error sharing document");
+      }
+    } catch (error) {
+      console.error("Error sending document:", error);
+    }
+  }}
+>
+  <ShareIcon className="h-4 w-4 mr-1" />
+  Share
+</button>
+
+</div>
+                  </div>
+                  {report.description && (
+                    <div className="mt-3 bg-[#112b5e] p-3 rounded-lg border-l-4 border-blue-400">
+                      <p className="text-sm">{report.description}</p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[#1d3b6e] p-8 rounded-lg text-center">
+              <DocumentTextIcon className="h-12 w-12 mx-auto text-blue-400 mb-4 opacity-70" />
+              <p className="text-gray-300">No {activeTab.replace(/([A-Z])/g, ' $1').toLowerCase()} found</p>
+            </div>
+          )}
+        </>
+      )}
+    </motion.div>
+  </div>
+)}
+
+      <div className="flex justify-between items-center mb-6">
+        <motion.h2
           className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-500"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -147,7 +397,7 @@ const DoctorHistoryUI = () => {
         >
           Doctors' History
         </motion.h2>
-        
+
         <div className="flex gap-4">
           <div className="relative">
             <input
@@ -171,7 +421,7 @@ const DoctorHistoryUI = () => {
               />
             </svg>
           </div>
-          
+
           <select
             className="px-4 py-2 rounded-full bg-[#1d3b6e] focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={filterStatus}
@@ -185,7 +435,7 @@ const DoctorHistoryUI = () => {
       </div>
 
       {sortedInteractions.length === 0 ? (
-        <motion.div 
+        <motion.div
           className="bg-[#112b5e] rounded-xl p-8 text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -203,7 +453,9 @@ const DoctorHistoryUI = () => {
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
             />
           </svg>
-          <h3 className="text-xl font-semibold mb-2">No doctor records found</h3>
+          <h3 className="text-xl font-semibold mb-2">
+            No doctor records found
+          </h3>
           <p className="text-gray-400">Try adjusting your search or filters</p>
         </motion.div>
       ) : (
@@ -236,29 +488,36 @@ const DoctorHistoryUI = () => {
               </div>
 
               {/* Appointment card */}
-              <div 
+              <div
                 className={`bg-[#112b5e] rounded-xl p-5 hover:shadow-lg transition-all duration-300 ${
-                  expandedId === interaction.id ? 'ring-2 ring-blue-400 shadow-xl' : 'hover:bg-[#14316c]'
+                  expandedId === interaction.id
+                    ? "ring-2 ring-blue-400 shadow-xl"
+                    : "hover:bg-[#14316c]"
                 }`}
               >
                 {/* Top section with doctor info - always visible */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-400">
-                      <img 
-                        src={interaction.profileImage} 
-                        alt={interaction.doctorName} 
+                      <img
+                        src={interaction.profileImage}
+                        alt={interaction.doctorName}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold group-hover:text-blue-400 transition-colors">
                         {interaction.doctorName}
+                        
                       </h3>
-                      <p className="text-blue-400 mb-1">{interaction.specialty}</p>
+                      <p className="text-blue-400 mb-1">
+                        {interaction.specialty}
+                      </p>
                       <div className="flex items-center">
                         {renderStars(interaction.rating)}
-                        <span className="ml-2 text-sm text-gray-300">{interaction.rating.toFixed(1)}</span>
+                        <span className="ml-2 text-sm text-gray-300">
+                          {interaction.rating.toFixed(1)}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -294,40 +553,51 @@ const DoctorHistoryUI = () => {
                       <BuildingOfficeIcon className="h-8 w-8 mr-3 text-blue-400 p-1 bg-blue-900 rounded-lg group-hover:scale-110 transition-transform" />
                       <div>
                         <h4 className="text-xs text-gray-300">Location</h4>
-                        <p className="text-sm font-medium">{interaction.location}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-[#1d3b6e] p-3 rounded-lg flex items-center group hover:bg-[#2a4d85] transition-colors cursor-pointer">
-                      <ClockIcon className="h-8 w-8 mr-3 text-blue-400 p-1 bg-blue-900 rounded-lg group-hover:scale-110 transition-transform" />
-                      <div>
-                        <h4 className="text-xs text-gray-300">Available Time</h4>
                         <p className="text-sm font-medium">
-                          {interaction.AvailableTimings?.[0] || "N/A"} - {interaction.AvailableTimings?.[1] || "N/A"}
+                          {interaction.location}
                         </p>
                       </div>
                     </div>
-                    
+
+                    <div className="bg-[#1d3b6e] p-3 rounded-lg flex items-center group hover:bg-[#2a4d85] transition-colors cursor-pointer">
+                      <ClockIcon className="h-8 w-8 mr-3 text-blue-400 p-1 bg-blue-900 rounded-lg group-hover:scale-110 transition-transform" />
+                      <div>
+                        <h4 className="text-xs text-gray-300">
+                          Available Time
+                        </h4>
+                        <p className="text-sm font-medium">
+                          {interaction.AvailableTimings?.[0] || "N/A"} -{" "}
+                          {interaction.AvailableTimings?.[1] || "N/A"}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="bg-[#1d3b6e] p-3 rounded-lg flex items-center group hover:bg-[#2a4d85] transition-colors cursor-pointer">
                       <PhoneIcon className="h-8 w-8 mr-3 text-blue-400 p-1 bg-blue-900 rounded-lg group-hover:scale-110 transition-transform" />
                       <div>
                         <h4 className="text-xs text-gray-300">Contact</h4>
-                        <p className="text-sm font-medium">{interaction.phone}</p>
+                        <p className="text-sm font-medium">
+                          {interaction.phone}
+                        </p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* Notes preview (truncated) - shown when not expanded */}
-                {expandedId !== interaction.id && interaction.notes && interaction.notes.length > 30 && (
-                  <div className="mt-3 bg-[#1a3563] p-3 rounded-lg border-l-4 border-blue-400">
-                    <h4 className="text-xs text-gray-300 mb-1 flex items-center">
-                      <DocumentTextIcon className="h-4 w-4 mr-1 text-blue-400" />
-                      Description Preview
-                    </h4>
-                    <p className="text-sm italic">"{interaction.notes.substring(0, 100)}..."</p>
-                  </div>
-                )}
+                {expandedId !== interaction.id &&
+                  interaction.notes &&
+                  interaction.notes.length > 30 && (
+                    <div className="mt-3 bg-[#1a3563] p-3 rounded-lg border-l-4 border-blue-400">
+                      <h4 className="text-xs text-gray-300 mb-1 flex items-center">
+                        <DocumentTextIcon className="h-4 w-4 mr-1 text-blue-400" />
+                        Description Preview
+                      </h4>
+                      <p className="text-sm italic">
+                        "{interaction.notes.substring(0, 100)}..."
+                      </p>
+                    </div>
+                  )}
 
                 {/* Action buttons - always visible */}
                 <div className="flex justify-between items-center mt-4">
@@ -336,6 +606,17 @@ const DoctorHistoryUI = () => {
                       <PencilIcon className="h-4 w-4 mr-1" />
                       Edit
                     </button>
+
+                    {/* New Share Button */}
+                    <button onClick={() => fetchReports(interaction.id)}
+
+                      className="px-3 py-1.5 bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-lg text-sm flex items-center transition-colors"
+                      disabled={isLoadingReports}
+                    >
+                      <ShareIcon className="h-4 w-4 mr-1" />
+                      {isLoadingReports ? "Loading..." : "Share"}
+                    </button>
+
                     {interaction.status === "completed" && (
                       <button className="px-3 py-1.5 bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-lg text-sm flex items-center transition-colors group">
                         <ArrowDownTrayIcon className="h-4 w-4 mr-1 group-hover:animate-bounce" />
@@ -343,14 +624,18 @@ const DoctorHistoryUI = () => {
                       </button>
                     )}
                   </div>
-                  
-                  <button 
+
+                  <button
                     onClick={() => toggleExpand(interaction.id)}
                     className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm flex items-center transition-colors"
                   >
-                    {expandedId === interaction.id ? 'View Less' : 'View Details'}
-                    <ChevronDownIcon 
-                      className={`w-4 h-4 ml-1 transition-transform ${expandedId === interaction.id ? 'rotate-180' : ''}`} 
+                    {expandedId === interaction.id
+                      ? "View Less"
+                      : "View Details"}
+                    <ChevronDownIcon
+                      className={`w-4 h-4 ml-1 transition-transform ${
+                        expandedId === interaction.id ? "rotate-180" : ""
+                      }`}
                     />
                   </button>
                 </div>
@@ -368,7 +653,9 @@ const DoctorHistoryUI = () => {
                       <div className="bg-[#1d3b6e] p-3 rounded-lg hover:bg-[#223d6c] transition-colors flex">
                         <MapPinIcon className="h-5 w-5 mr-2 text-blue-400" />
                         <div>
-                          <h4 className="text-sm text-gray-300 mb-1">Location</h4>
+                          <h4 className="text-sm text-gray-300 mb-1">
+                            Location
+                          </h4>
                           <p>{interaction.location}</p>
                         </div>
                       </div>
@@ -376,10 +663,16 @@ const DoctorHistoryUI = () => {
                       <div className="bg-[#1d3b6e] p-3 rounded-lg hover:bg-[#223d6c] transition-colors flex">
                         <CalendarDaysIcon className="h-5 w-5 mr-2 text-blue-400" />
                         <div>
-                          <h4 className="text-sm text-gray-300 mb-1">Available Days</h4>
+                          <h4 className="text-sm text-gray-300 mb-1">
+                            Available Days
+                          </h4>
                           <p>
-                            {interaction.followUp && Array.isArray(interaction.followUp) && interaction.followUp.length > 0
-                              ? interaction.followUp.map((day) => day.slice(0, 3)).join(", ")
+                            {interaction.followUp &&
+                            Array.isArray(interaction.followUp) &&
+                            interaction.followUp.length > 0
+                              ? interaction.followUp
+                                  .map((day) => day.slice(0, 3))
+                                  .join(", ")
                               : "Not specified"}
                           </p>
                         </div>
@@ -416,7 +709,9 @@ const DoctorHistoryUI = () => {
                       <div className="flex items-start">
                         <DocumentTextIcon className="h-5 w-5 mr-2 text-blue-400 mt-1" />
                         <div>
-                          <h4 className="text-sm text-gray-300 mb-1">Full Description</h4>
+                          <h4 className="text-sm text-gray-300 mb-1">
+                            Full Description
+                          </h4>
                           <p className="text-sm">{interaction.notes}</p>
                         </div>
                       </div>

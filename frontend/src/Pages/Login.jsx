@@ -25,6 +25,7 @@ const Login = () => {
         localStorage.setItem("username", response.data.username);
         localStorage.setItem("role", response.data.role);
         localStorage.setItem("email", response.data.email);
+        localStorage.setItem("userId", response.data.userId); // Store user ID
         
         // Redirect to Dashboard after login
         navigate("/");
