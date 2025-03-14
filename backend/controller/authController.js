@@ -35,35 +35,55 @@ const authMiddleware = async (req, res, next) => {
 
 
 // Register User
- const register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { name, email, password,role } = req.body;
+    const { name, email, password, role } = req.body;
+    
+    // Get token from headers and decode it
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
+    const decoded = jwt.verify(token, 'adarsh1234'); // Verify token
+    const userId = decoded.userId; // Extract user ID from token
+
+    // Check if user already exists
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "Email already exists" });
+    if (userExists) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPassword,role });
+    // Create a new user with the userId from token
+    const user = new User({ _id: userId, name, email, password: hashedPassword, role });
+
+    // Save user to database
     await user.save();
 
-    // Create Email Verification Token
-    const token = jwt.sign({ email }, 'adarsh1234', { expiresIn: "1d" });
-    const verificationLink = `http://localhost:5000/api/auth/verify/${token}`;
-    // Send Verification Email
+    // Generate a new verification token
+    const verificationToken = jwt.sign({ email, userId }, 'adarsh1234', { expiresIn: "1d" });
+    const verificationLink = `http://localhost:5000/api/auth/verify/${verificationToken}`;
+
+    // Send verification email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Verify your Email",
       html: `<p>Click <a href="${verificationLink}" target="_blank">${verificationLink}</a> to verify your email.</p>`,
     });
-    
 
-    res.status(201).json({ message: "User registered! Please verify your email." });
+    res.status(201).json({ 
+      message: "User registered! Please verify your email.", 
+      userId 
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 // Verify Email
@@ -188,7 +208,8 @@ const shareddoc = async (req, res) => {
 
     // Store in DB
     await sharedDocSchema.create({ userId, docId, supabaseUrl });
-    res.json({ success: true, message: 'Document shared successfully' });    console.log("Document shared successfully");
+    res.json({ message: 'Document shared successfully' });
+    console.log("Document shared successfully");
 } catch (err) {
     res.status(500).json({ error: 'Server error' });
 }
@@ -196,21 +217,54 @@ const shareddoc = async (req, res) => {
 
 
 // doctor to get shared data
-
 const getshareddoc = async (req, res) => {
   try {
-      const { docId } = req.body;
+    const { docId, userId } = req.body;
+    console.log("Received GET request with:", { docId, userId });
 
-      // Ensure input is valid
-      if (!docId) {
-          return res.status(400).json({ error: 'Missing required fields' });
-      }
+    // Ensure input is valid
+    if (!docId || !userId) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    console.log("Received GET request with:", { docId, userId });
 
-      // Get shared documents
-      const sharedDocs = await sharedDocSchema.find({ docId });
-      res.json({ sharedDocs });
+    // Get all shared documents matching docId and userId
+    const sharedDocs = await sharedDocSchema.find({ docId, userId });
+
+    if (!sharedDocs || sharedDocs.length === 0) {
+      return res.status(404).json({ error: "No documents found" });
+    }
+
+    // Extract Supabase URLs from all documents
+    const supabaseUrls = sharedDocs.map((doc) => doc.supabaseUrl);
+
+    res.json({ supabaseUrls });
   } catch (err) {
-      res.status(500).json({ error: 'Server error' });
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+const allpatients = async (req, res) => { 
+  try {
+    const { docEmail } = req.body;
+
+    if (!docEmail) {
+      return res.status(400).json({ error: "Doctor Email is required" });
+    }
+
+    // Fetch all patients where the doctor has accepted the connection
+    const patients = await connection.find({ docEmail, docAccepted: true });
+
+    if (!patients.length) {
+      return res.status(404).json({ message: "No patients found" });
+    }
+
+    res.json({ patients });
+  } catch (err) {
+    console.error("Error fetching patients:", err);
+    res.status(500).json({ error: "Server error" });
   }
 }
 
@@ -331,6 +385,7 @@ module.exports = {
     logout,
     authMiddleware,
     doctorRedg,
+    allpatients,
     shareddoc,
     getshareddoc,
     getdocdetails

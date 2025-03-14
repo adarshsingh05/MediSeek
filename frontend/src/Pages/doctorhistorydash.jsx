@@ -34,7 +34,7 @@ const DoctorHistoryUI = () => {
   const [reportError, setReportError] = useState("");
 const [docid, setDocId] = useState("");
   const emailpass = localStorage.getItem("email");
-  const userids = localStorage.getItem("userId") || "";
+  const userids = localStorage.getItem("email") || "";
 
   useEffect(() => {
     const fetchDoctorDetails = async () => {
@@ -114,6 +114,7 @@ const [docid, setDocId] = useState("");
     status: "completed",
     notes: doctor?.bio || "Not Given",
     AvailableTimings: [doctor?.availableTimeStart, doctor?.availableTimeEnd],
+    doctEmail: doctor?.email || "Not Given",
     followUp: doctor?.availableDays || [],
     doctorEmail: doctor?.email
       ? `${doctor.email.slice(0, 3)}...${doctor.email.slice(-9)}`
@@ -344,7 +345,7 @@ const [docid, setDocId] = useState("");
         }
       );
 
-      if (response.data.success) {
+      
         console.log("Upload successful");
         alert("Uploaded successfully");
 
@@ -354,9 +355,7 @@ const [docid, setDocId] = useState("");
         button.classList.remove("bg-blue-600", "hover:bg-blue-700");
         button.classList.add("bg-green-500", "cursor-not-allowed");
         button.disabled = true; // Disable the button
-      } else {
-        alert("Error sharing document");
-      }
+     
     } catch (error) {
       console.error("Error sending document:", error);
     }
@@ -608,7 +607,7 @@ const [docid, setDocId] = useState("");
                     </button>
 
                     {/* New Share Button */}
-                    <button onClick={() => fetchReports(interaction.id)}
+                    <button onClick={() => fetchReports(interaction.doctEmail)}
 
                       className="px-3 py-1.5 bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-lg text-sm flex items-center transition-colors"
                       disabled={isLoadingReports}

@@ -12,6 +12,7 @@ import DoctorsPage from './Pages/doctors';
 import DoctorRegistration from './Pages/doctorredg';
 import DoctorDashboard from './Pages/yourpatient';
 import DoctorDetailsModal from './Pages/docmodal';
+import GetPatients from './Pages/patdocuments';
 
 const App = () => {
   return (
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/doctorsredg" element={<DoctorRegistration/>}></Route>
           <Route path="/patients" element={<DoctorDashboard/>}></Route>
           <Route path="/docs" element={<DoctorDetailsModal/>}></Route>
+          <Route path="/getp" element={<GetPatients/>}></Route>
         </Routes>
       </div>
     </Router>

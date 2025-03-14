@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, verifyEmail, login,shareddoc,getshareddoc,accept, logout,authMiddleware, doctorRedg, doctorredgdone, docconnection, getreq, getdocdetails } = require("../controller/authController");
+const { register, verifyEmail, login,shareddoc,getshareddoc,accept, logout,authMiddleware, doctorRedg, doctorredgdone, docconnection, getreq, getdocdetails, allpatients } = require("../controller/authController");
 const router = express.Router();
 
 router.post("/register", register);
@@ -11,7 +11,8 @@ router.post('/checkdoctorisreg',doctorredgdone);
 router.post('/uploadshareddoc',shareddoc);
 router.post('/docconnection',docconnection);
 router.patch('/accept',accept);
-router.get('/getshareddoc',getshareddoc);
+router.post('/getshareddoc',getshareddoc);
 router.get('/getreq',getreq);
+router.post('/allpatients',allpatients);
 router.post('/getdocdetails',getdocdetails);
 module.exports = router;

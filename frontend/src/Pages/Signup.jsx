@@ -29,6 +29,7 @@ const SignupModal = ({ isOpen, onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Send token in headers
         },
         body: JSON.stringify(formData),
       });
