@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useRef } from "react";
+import { io } from "socket.io-client";
+import { Send } from "lucide-react";
+import ChatComponents from "./chatfordoc";
+
+const socket = io("http://localhost:5000"); // Update with your backend URL
+
 import {
   MessageSquare,
   Calendar,
@@ -7,7 +13,7 @@ import {
   Bell,
   Settings,
   Search,
-  Send,
+  // Send,
   Video,
   Phone,
   Plus,
@@ -26,6 +32,95 @@ const DoctorDashboard = () => {
   const [docEmail, setDocEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const chatRef = useRef(null);
+
+
+
+const doctorId = email
+console.log("setting the doctor id as an email", doctorId);
+const patientId =userEmail;
+console.log("setting the patient id as an email", patientId);
+
+
+  // ✅ Load chat history on patient selection
+  useEffect(() => {
+    if (patientId) {
+      fetchChatHistory();
+    }
+  }, [patientId]);
+
+  // ✅ Fetch chat history
+  const fetchChatHistory = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/history/${doctorId}/${patientId}`);
+      const data = await response.json();
+      console.log("Chat history:", data);
+      setMessages(data);
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+  };
+
+  // ✅ Listen for new messages
+  useEffect(() => {
+    socket.emit("joinRoom", { doctorId, patientId });
+
+    socket.on("receiveMessage", (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    return () => {
+      socket.off("receiveMessage");
+    };
+  }, [doctorId, patientId]);
+
+  // ✅ Send message function
+  const sendMessage = async () => {
+    if (!message.trim()) return;
+
+    const newMessage = {
+      senderId: doctorId,
+      receiverId: patientId,
+      message: message.trim(),
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const response = await fetch("http://localhost:5000/api/chat/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newMessage),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        socket.emit("sendMessage", newMessage);
+        setMessage("");
+      } else {
+        console.error("Failed to send message:", data.error);
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  };
+
+  // ✅ Scroll to bottom on new messages
+  useEffect(() => {
+    chatRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+
+
+
+
+
+
+
+
+
 
   // Step 1: Get email from localStorage on mount
   useEffect(() => {
@@ -242,63 +337,31 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Main Content / Chat Area */}
-        <div
-          ref={homeRef}
-          id="home"
-          className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden"
-        >
-          {selectedPatient ? (
-            <>
-              {/* Chat Header */}
-
-              {/* Message Input */}
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full p-10">
-              <div className="text-center bg-white p-10 rounded-2xl shadow-sm border border-blue-100 max-w-lg">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-teal-50 rounded-2xl text-teal-500 mb-6">
-                  <MessageSquare size={40} />
-                </div>
-                <h2 className="text-3xl font-bold mb-4 text-gray-800">
-                  Welcome to MediSeek.ai
-                </h2>
-                <p className="text-gray-600 mb-8">
-                  Your AI-powered telemedicine platform. Select a patient from
-                  the list to start a consultation or respond to new connection
-                  requests.
-                </p>
-                <div className="grid grid-cols-3 gap-4 mb-8">
-                  <div className="p-4 bg-blue-50 rounded-xl text-center">
-                    <h3 className="text-3xl font-bold text-teal-600">
-                      {requests.filter((req) => req.docAccepted).length}
-                    </h3>
-                    <p className="text-sm text-gray-600">Patients</p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-xl text-center">
-                    <h3 className="text-3xl font-bold text-teal-600">
-                      {requests.filter((req) => req.docAccepted).length}
-                    </h3>
-                    <p className="text-sm text-gray-600">Appointments</p>
-                  </div>
-                  <div className="p-4 bg-blue-50 rounded-xl text-center">
-                    <h3 className="text-3xl font-bold text-teal-600">
-                      {requests.filter((req) => req.docAccepted) ===
-                      true.length > 0
-                        ? `${
-                            requests.filter((req) => req.docAccepted).length
-                          } new requests`
-                        : 0}{" "}
-                    </h3>
-                    <p className="text-sm text-gray-600">Requests</p>
-                  </div>
-                </div>
-                <button className="bg-teal-500 text-white py-3 px-6 rounded-xl hover:bg-teal-600 transition-colors">
-                  Start a new consultation
-                </button>
-              </div>
+        <div ref={homeRef} id="home" className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden">
+  {selectedPatient ? (
+    <ChatComponents doctorId={doctorId} patientId={selectedPatient.userEmail} />
+  ) : (
+    <div className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden">
+      {patientId ? (
+        <ChatComponents doctorId={doctorId} patientId={requests.userEmail} />
+      ) : (
+        <div className="flex items-center justify-center h-full p-10">
+          <div className="text-center bg-white p-10 rounded-2xl shadow-sm border border-blue-100 max-w-lg">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-teal-50 rounded-2xl text-teal-500 mb-6">
+              <Send size={40} />
             </div>
-          )}
+            <h2 className="text-3xl font-bold mb-4 text-gray-800">
+              Welcome to MediSeek.ai
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Select a patient to start a consultation or respond to new requests.
+            </p>
+          </div>
         </div>
+      )}
+    </div>
+  )}
+</div>
         {/* Patients List Column */}
         <div className="w-80 bg-white shadow-md overflow-hidden m-4 rounded-2xl flex flex-col border-l border-r border-blue-100">
           <div className="p-5 border-b border-blue-100">

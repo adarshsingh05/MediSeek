@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
+import ChatModal from "./chatComponent";
 import {
   EyeIcon,
   PencilIcon,
@@ -21,7 +22,9 @@ import {
 
 const DoctorHistoryUI = () => {
   const [filterStatus, setFilterStatus] = useState("all");
+  const [showChat, setShowChat] = useState(false);
   const [activeTab, setActiveTab] = useState("labReports");
+  const authToken = localStorage.getItem("authToken");
 
   const [doctor, setDoctor] = useState([]);
   const [error, setError] = useState("");
@@ -601,10 +604,23 @@ const [docid, setDocId] = useState("");
                 {/* Action buttons - always visible */}
                 <div className="flex justify-between items-center mt-4">
                   <div className="flex gap-2">
-                    <button className="px-3 py-1.5 bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-lg text-sm flex items-center transition-colors">
+                    <button key={doctor._id} className="px-3 py-1.5 bg-[#1d3b6e] hover:bg-[#2a4d85] rounded-lg text-sm flex items-center transition-colors">
                       <PencilIcon className="h-4 w-4 mr-1" />
                       Edit
                     </button>
+
+                    <button onClick={() => setShowChat(true)} className="mt-2 px-4 py-2 bg-blue-500 text-white rounded">
+        Chat with {interaction.doctorName}
+      </button>
+
+      {showChat && (
+        <ChatModal
+        senderId={userids}  // Correct user ID from localStorage
+        receiverId={interaction.doctEmail}
+        receiverName={interaction.doctorName}
+        onClose={() => setShowChat(false)}
+      />
+      )}
 
                     {/* New Share Button */}
                     <button onClick={() => fetchReports(interaction.doctEmail)}

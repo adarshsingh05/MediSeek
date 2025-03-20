@@ -1,32 +1,53 @@
-const { Server } = require('socket.io');
-const Message = require('../models/Message'); // Import the Message model
-const initSocket = (server) => {
-    const io = new Server(server, {
-        cors: { origin: '*' },
+const { Server } = require("socket.io");
+const Message = require("../models/Message");
+const { encryptMessage, decryptMessage } = require("../utils/encrypt");
+
+const socketHandler = (server) => {
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+    },
+  });
+
+  io.on("connection", (socket) => {
+    console.log("New client connected:", socket.id);
+
+    // Join chat room
+    socket.on("joinRoom", ({ senderId, receiverId }) => {
+      const roomId = [senderId, receiverId].sort().join("_");
+      socket.join(roomId);
     });
 
-    io.on('connection', (socket) => {
-        console.log('🔵 User connected:', socket.id);
-
-        socket.on('joinRoom', ({ senderId, receiverId }) => {
-            const room = [senderId, receiverId].sort().join('_');
-            socket.join(room);
+    // Handle sending messages
+    socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
+        console.log("Received message:", message); // Debugging step
+      
+        if (!message || typeof message !== "string") {
+          console.error("Error: Message is undefined or not a string!");
+          return;
+        }
+      
+        const encryptedMessage = encryptMessage(message);
+        
+        // Save message in MongoDB
+        const newMessage = new Message({ senderId, receiverId, message: encryptedMessage });
+        await newMessage.save();
+      
+        const roomId = [senderId, receiverId].sort().join("_");
+      
+        // Broadcast message to the room
+        io.to(roomId).emit("receiveMessage", {
+          senderId,
+          receiverId,
+          message, // Sending decrypted message
         });
+      });
+      
 
-        socket.on('sendMessage', async (data) => {
-            const { senderId, receiverId, messageText } = data;
-
-            const message = new Message({ senderId, receiverId, messageText });
-            await message.save();
-
-            const room = [senderId, receiverId].sort().join('_');
-            io.to(room).emit('receiveMessage', message);
-        });
-
-        socket.on('disconnect', () => {
-            console.log('🔴 User disconnected:', socket.id);
-        });
+    socket.on("disconnect", () => {
+      console.log("Client disconnected");
     });
+  });
 };
 
-module.exports = initSocket;
+module.exports = socketHandler;
