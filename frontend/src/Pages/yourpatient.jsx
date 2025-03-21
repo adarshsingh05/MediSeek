@@ -36,13 +36,10 @@ const DoctorDashboard = () => {
   const [messages, setMessages] = useState([]);
   const chatRef = useRef(null);
 
-
-
-const doctorId = email
-console.log("setting the doctor id as an email", doctorId);
-const patientId =userEmail;
-console.log("setting the patient id as an email", patientId);
-
+  const doctorId = email;
+  console.log("setting the doctor id as an email", doctorId);
+  const patientId = userEmail;
+  console.log("setting the patient id as an email", patientId);
 
   // ✅ Load chat history on patient selection
   useEffect(() => {
@@ -54,7 +51,9 @@ console.log("setting the patient id as an email", patientId);
   // ✅ Fetch chat history
   const fetchChatHistory = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/history/${doctorId}/${patientId}`);
+      const response = await fetch(
+        `http://localhost:5000/history/${doctorId}/${patientId}`
+      );
       const data = await response.json();
       console.log("Chat history:", data);
       setMessages(data);
@@ -111,16 +110,6 @@ console.log("setting the patient id as an email", patientId);
   useEffect(() => {
     chatRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-
-
-
-
-
-
-
-
-
 
   // Step 1: Get email from localStorage on mount
   useEffect(() => {
@@ -252,7 +241,6 @@ console.log("setting the patient id as an email", patientId);
               <Users size={20} />
             </button>
             <button className="h-12 w-12 rounded-xl bg-teal-400 text-white flex items-center justify-center transition hover:bg-teal-300">
-              
               <Calendar size={20} />
             </button>
           </nav>
@@ -337,28 +325,30 @@ console.log("setting the patient id as an email", patientId);
         </div>
 
         {/* Main Content / Chat Area */}
-        <div ref={homeRef} id="home" className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden">
-  {selectedPatient ? (
+        {/* Main Content / Chat Area */}
+<div
+  ref={homeRef}
+  id="home"
+  className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden"
+>
+  {/* Check if selectedPatient exists and has a valid email */}
+  {selectedPatient && selectedPatient.userEmail ? (
     <ChatComponents doctorId={doctorId} patientId={selectedPatient.userEmail} />
+  ) : patientId && requests?.userEmail ? (
+    <ChatComponents doctorId={doctorId} patientId={requests.userEmail} />
   ) : (
-    <div className="flex-1 flex flex-col bg-blue-50 relative overflow-hidden">
-      {patientId ? (
-        <ChatComponents doctorId={doctorId} patientId={requests.userEmail} />
-      ) : (
-        <div className="flex items-center justify-center h-full p-10">
-          <div className="text-center bg-white p-10 rounded-2xl shadow-sm border border-blue-100 max-w-lg">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-teal-50 rounded-2xl text-teal-500 mb-6">
-              <Send size={40} />
-            </div>
-            <h2 className="text-3xl font-bold mb-4 text-gray-800">
-              Welcome to MediSeek.ai
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Select a patient to start a consultation or respond to new requests.
-            </p>
-          </div>
+    <div className="flex items-center justify-center h-full p-10">
+      <div className="text-center bg-white p-10 rounded-2xl shadow-sm border border-blue-100 max-w-lg">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-teal-50 rounded-2xl text-teal-500 mb-6">
+          <Send size={40} />
         </div>
-      )}
+        <h2 className="text-3xl font-bold mb-4 text-gray-800">
+          Welcome to MediSeek.ai
+        </h2>
+        <p className="text-gray-600 mb-8">
+          Select a patient to start a consultation or respond to new requests.
+        </p>
+      </div>
     </div>
   )}
 </div>
@@ -398,7 +388,7 @@ console.log("setting the patient id as an email", patientId);
               >
                 <div className="flex items-center space-x-3">
                   <div className="relative">
-                  <div className="w-14 h-14 rounded-lg shadow-md flex items-center justify-center bg-teal-400 text-gray-800 text-lg font-bold">
+                    <div className="w-14 h-14 rounded-lg shadow-md flex items-center justify-center bg-teal-400 text-gray-800 text-lg font-bold">
                       {request.username?.charAt(0).toUpperCase() || "R"}
                     </div>
                     <span
