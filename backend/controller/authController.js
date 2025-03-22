@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 const Doctor = require("../models/doctors.js");
 const sharedDocSchema = require("../models/SharedDoc.js");
 const connection = require("../models/connection.js");
+const Hospital = require("../models/hospitals.js");
 
 // Email Transporter
 const transporter = nodemailer.createTransport({
@@ -314,6 +315,44 @@ const accept = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const getHospitals = async(req,res)=>{
+  try {
+    const { latitude, longitude } = req.body;
+
+    const hospitals = await Hospital.find({
+      location: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [longitude, latitude] },
+          $maxDistance: 5000, // 5km radius
+        },
+      },
+    });
+
+    res.status(200).json(hospitals);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+const addHospitals = async (req, res) => {
+  try {
+    const { name, address, latitude, longitude } = req.body;
+
+    const newHospital = new Hospital({
+      name,
+      address,
+      location: {
+        type: "Point",
+        coordinates: [longitude, latitude],
+      },
+    });
+
+    await newHospital.save();
+    res.status(201).json({ message: "Hospital added successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 
 const getdocdetails = async (req, res) => {
@@ -381,7 +420,9 @@ module.exports = {
     accept,
     doctorredgdone,
     verifyEmail,
+    getHospitals, 
     login,
+    addHospitals,
     logout,
     authMiddleware,
     doctorRedg,

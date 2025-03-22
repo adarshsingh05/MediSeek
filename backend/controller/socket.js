@@ -20,10 +20,9 @@ const socketHandler = (server) => {
 
     // Handle sending messages
     socket.on("sendMessage", async ({ senderId, receiverId, message }) => {
-        console.log("Received message:", message); // Debugging step
-      
+        console.log("Received message:", message); 
         if (!message || typeof message !== "string") {
-          console.error("Error: Message is undefined or not a string!");
+          console.error("Error: Message npt thrre");
           return;
         }
       
@@ -39,7 +38,7 @@ const socketHandler = (server) => {
         io.to(roomId).emit("receiveMessage", {
           senderId,
           receiverId,
-          message, // Sending decrypted message
+          message, 
         });
       });
       

@@ -13,8 +13,9 @@ connectDB();
 // ✅ Fix CORS Issues
 app.use(
   cors({
-    origin: "*", // Allow requests from frontend
-    credentials: true, // Allow cookies and authentication headers
+    origin: "http://localhost:5173",
+    credentials: true, // Allow cookies/session authentication
+    // Allow only localhost:5173    credentials: true, // Allow cookies and authentication headers
   })
 );
 app.use(express.json()); // ✅ Middleware to parse JSON bodies

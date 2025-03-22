@@ -14,6 +14,59 @@ const ChatComponents = ({ doctorId, patientId }) => {
   console.log("Received doctorId:", doctorId);
   console.log("Received patientId:", patientId);
 
+
+   // ✅ Real-time socket event handlers (Avoids duplicate listeners)
+   useEffect(() => {
+    if (!doctorId || !patientId) return;
+
+    socket.emit("joinRoom", { doctorId, patientId });
+
+    const handleReceiveMessage = (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]); // ✅ Always update state
+    };
+
+    socket.on("receiveMessage", handleReceiveMessage);
+
+    return () => {
+      socket.off("receiveMessage", handleReceiveMessage);
+    };
+  }, [doctorId, patientId]);
+
+
+    // 📌 Send Message (to DB + Socket)
+    const sendMessage = async () => {
+      if (!message.trim()) return;
+      const msgData = {
+        senderId: doctorId,
+        receiverId: patientId,
+        message: message.trim(),
+        createdAt: new Date().toISOString(),
+      };
+  
+      try {
+        const response = await fetch("http://localhost:5000/api/chat/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(msgData),
+        });
+  
+        const data = await response.json();
+  
+        if (data.success) {
+          socket.emit("sendMessage", msgData); // ✅ Send message to socket
+          setMessages((prevMessages) => [...prevMessages, msgData]); // ✅ Update UI instantly
+          setMessage(""); // ✅ Clear input field
+          inputRef.current.focus();
+        } else {
+          console.error("Failed to send message:", data.error);
+        }
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
+    };
+
   // 📌 Fetch previous messages when chat opens
   const fetchMessages = async () => {
     try {
@@ -39,22 +92,7 @@ const ChatComponents = ({ doctorId, patientId }) => {
     fetchMessages();
   }, [doctorId, patientId]);
 
-  // ✅ Real-time socket event handlers (Avoids duplicate listeners)
-  useEffect(() => {
-    if (!doctorId || !patientId) return;
 
-    socket.emit("joinRoom", { doctorId, patientId });
-
-    const handleReceiveMessage = (newMessage) => {
-      setMessages((prevMessages) => [...prevMessages, newMessage]); // ✅ Always update state
-    };
-
-    socket.on("receiveMessage", handleReceiveMessage);
-
-    return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-    };
-  }, [doctorId, patientId]);
 
   // 📌 Scroll to the latest message
   // useEffect(() => {
@@ -63,39 +101,6 @@ const ChatComponents = ({ doctorId, patientId }) => {
   //   }
   // }, [messages]);
 
-  // 📌 Send Message (to DB + Socket)
-  const sendMessage = async () => {
-    if (!message.trim()) return;
-    const msgData = {
-      senderId: doctorId,
-      receiverId: patientId,
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      const response = await fetch("http://localhost:5000/api/chat/send", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(msgData),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        socket.emit("sendMessage", msgData); // ✅ Send message to socket
-        setMessages((prevMessages) => [...prevMessages, msgData]); // ✅ Update UI instantly
-        setMessage(""); // ✅ Clear input field
-        inputRef.current.focus();
-      } else {
-        console.error("Failed to send message:", data.error);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
 
   // Handle Enter key press
   const handleKeyPress = (e) => {
