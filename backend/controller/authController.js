@@ -40,14 +40,14 @@ const register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     
-    // Get token from headers and decode it
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
+    // // Get token from headers and decode it
+    // const token = req.headers.authorization?.split(" ")[1];
+    // if (!token) {
+    //   return res.status(401).json({ message: "No token provided" });
+    // }
 
-    const decoded = jwt.verify(token, 'adarsh1234'); // Verify token
-    const userId = decoded.userId; // Extract user ID from token
+    // const decoded = jwt.verify(token, 'adarsh1234'); // Verify token
+    // const userId = decoded.userId; // Extract user ID from token
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -59,13 +59,13 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user with the userId from token
-    const user = new User({ _id: userId, name, email, password: hashedPassword, role });
+    const user = new User({  name, email, password: hashedPassword, role });
 
     // Save user to database
     await user.save();
 
     // Generate a new verification token
-    const verificationToken = jwt.sign({ email, userId }, 'adarsh1234', { expiresIn: "1d" });
+    const verificationToken = jwt.sign({ email }, 'adarsh1234', { expiresIn: "1d" });
     const verificationLink = `http://localhost:5000/api/auth/verify/${verificationToken}`;
 
     // Send verification email
@@ -78,7 +78,7 @@ const register = async (req, res) => {
 
     res.status(201).json({ 
       message: "User registered! Please verify your email.", 
-      userId 
+      // userId 
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
