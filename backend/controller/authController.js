@@ -333,13 +333,24 @@ const getHospitals = async(req,res)=>{
     res.status(500).json({ error: error.message });
   }
 }
-
+const getAllHospitals = async (req, res) => {
+  try {
+    const hospitals = await Hospital.find(); // Fetch all hospitals
+    if (!hospitals || hospitals.length === 0) {
+      return res.status(404).json({ message: "No hospitals found" });
+    }
+    res.status(200).json(hospitals);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 const addHospitals = async (req, res) => {
   try {
-    const { name, address, latitude, longitude } = req.body;
+    const { name, email, address, latitude, longitude } = req.body;
 
     const newHospital = new Hospital({
       name,
+      email,
       address,
       location: {
         type: "Point",

@@ -1,5 +1,5 @@
 const express = require('express');
-const { register, verifyEmail, login,shareddoc,getshareddoc,accept, logout,authMiddleware, doctorRedg, doctorredgdone, docconnection, getreq, getdocdetails, allpatients, addHospitals, getHospitals } = require("../controller/authController");
+const { register, verifyEmail, login,shareddoc,getshareddoc,accept, logout,authMiddleware, doctorRedg, doctorredgdone, docconnection, getreq, getdocdetails, allpatients, addHospitals, getHospitals, getAllHospitals } = require("../controller/authController");
 const router = express.Router();
 
 router.post("/register", register);
