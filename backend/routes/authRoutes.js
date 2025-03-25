@@ -17,5 +17,6 @@ router.post('/allpatients',allpatients);
 router.post('/getdocdetails',getdocdetails);
 router.post('/addhospitals', addHospitals);
 router.post('/gethospitals',getHospitals);
+router.get('/getallhospitals',getAllHospitals);
 
 module.exports = router;

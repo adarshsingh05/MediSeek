@@ -433,6 +433,7 @@ module.exports = {
     verifyEmail,
     getHospitals, 
     login,
+    getAllHospitals,
     addHospitals,
     logout,
     authMiddleware,

@@ -419,7 +419,7 @@ export default function HospitalRegistration() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Increased Visibility</h3>
+              <h3 className="text-xl text-gray-600 font-bold mb-2">Increased Visibility</h3>
               <p className="text-gray-600">
                 Get discovered by patients looking for healthcare services in your area. Improve your online presence.
               </p>
@@ -442,7 +442,7 @@ export default function HospitalRegistration() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Analytics Dashboard</h3>
+              <h3 className="text-xl font-bold text-gray-600 mb-2">Analytics Dashboard</h3>
               <p className="text-gray-600">
                 Access detailed analytics about patient inquiries, popular services, and performance metrics.
               </p>
@@ -465,7 +465,7 @@ export default function HospitalRegistration() {
                   />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-2">Patient Communication</h3>
+              <h3 className="text-xl font-bold text-gray-600 mb-2">Patient Communication</h3>
               <p className="text-gray-600">
                 Streamline communication with patients through our secure messaging platform and appointment system.
               </p>

@@ -274,6 +274,8 @@ const LandingPage = () => {
           { name: "Dashboard", path: "/doctorsredg" },
           { name: "AI Support", path: "/ai-support" },
           { name: "Workspace", path: "/workspace" },
+          { name: "List Hospitals", path: "/hospitals" },
+
         ]
       : [
           { name: "Home", path: "/" },
@@ -282,6 +284,7 @@ const LandingPage = () => {
           { name: "AI Ground", path: "/chat" },
           { name: "Vault", path: "/vault" },
           { name: "Our Doctors", path: "/doctors" },
+          { name: "Hospitals", path: "/allhospitals" },
         ];
 
   const scrollToFeatures = () => {

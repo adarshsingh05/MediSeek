@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const hospitalSchema = new mongoose.Schema({
+  email: String,
   name: String,
   address: String,
   location: {
