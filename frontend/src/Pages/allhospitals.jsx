@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-
+import { useNavigate } from "react-router-dom";
+import { MapPinCheck } from "lucide-react"
 function HospitalsList() {
   const [hospitals, setHospitals] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState("hospitals")
-
+const navigate = useNavigate();
   useEffect(() => {
     const fetchHospitals = async () => {
       try {
@@ -112,6 +113,7 @@ function HospitalsList() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex flex-row items-end justify-between"> 
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -121,7 +123,21 @@ function HospitalsList() {
           <h1 className="text-3xl font-bold text-gray-800 mb-2">All Hospitals</h1>
           <p className="text-gray-600">Browse our network of registered healthcare providers</p>
         </motion.div>
-
+        <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-gradient-to-r from-teal-50 to-indigo-50 border border-indigo-100 cursor-pointer"
+                  onClick={() => navigate("/auto")}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600">
+                    <MapPinCheck size={17} className="text-teal-200" />
+                  </span>
+                  <span className="text-sm font-medium text-indigo-700">
+                    Get Hospitals Near You in once click
+                  </span>
+                </motion.div>
+        </div>
         {/* Search Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
