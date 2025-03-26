@@ -75,7 +75,7 @@ function HospitalsList() {
             mediseek.ai
           </motion.a>
           <nav className="hidden md:flex items-center space-x-8">
-            {["Home", "Dashboard", "Hospitals", "Analytics", "Support"].map((item, index) => (
+            {["Home","Your Report", "Dashboard","AI Groud", "Vault", "Our Doctors", "Hospitals", ].map((item, index) => (
               <motion.a
                 key={index}
                 href={`/${item.toLowerCase() === 'home' ? '' : item.toLowerCase()}`}

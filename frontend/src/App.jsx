@@ -15,6 +15,7 @@ import DoctorDetailsModal from './Pages/docmodal';
 import GetPatients from './Pages/patdocuments';
 import HospitalRegistration from './Pages/Hospitals';
 import HospitalsList from './Pages/allhospitals';
+import HospitalFinder from './Pages/autohospitals';
 
 const App = () => {
   return (
@@ -42,6 +43,7 @@ const App = () => {
           <Route path="/getp" element={<GetPatients/>}></Route>
           <Route path="/hospitals" element={<HospitalRegistration/>}></Route>
           <Route path="/allhospitals" element={<HospitalsList/>}></Route>
+          <Route path="/auto" element={<HospitalFinder/>}></Route>
         </Routes>
       </div>
     </Router>
