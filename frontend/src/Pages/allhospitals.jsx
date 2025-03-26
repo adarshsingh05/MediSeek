@@ -153,7 +153,9 @@ function HospitalsList() {
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
             </div>
+           
           </div>
+         
         </motion.div>
 
         {/* Hospitals List */}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Footer from "../Components/Footer"
 import {
   MapPin,
   Search,
@@ -344,7 +345,7 @@ const HospitalCard = ({ hospital }) => {
           </div>
 
           <button className="flex items-center text-sm font-medium text-white bg-gradient-to-r from-teal-500 to-blue-500 px-3 py-1.5 rounded-full transform group-hover:translate-x-1 transition-transform duration-300 hover:shadow-md">
-            View Details <ChevronRight size={16} className="ml-1 animate-bounce-x" />
+            View on Map <ChevronRight size={16} className="ml-1 animate-bounce-x" />
           </button>
         </div>
       </div>
@@ -479,7 +480,7 @@ const HospitalFinder = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12">
         {/* Header Section with animated elements */}
         <div className="text-center mb-12 relative">
-          <div className="inline-flex items-center justify-center bg-gradient-to-r from-teal-500 to-blue-500 text-white px-5 py-2 rounded-full text-sm font-medium mb-6 shadow-md animate-bounce-subtle">
+          <div className="inline-flex mr-4  items-center justify-center bg-gradient-to-r from-teal-500 to-blue-500 text-white px-5 py-2 rounded-full text-sm font-medium mb-6 shadow-md animate-bounce-subtle">
             <MapPin className="mr-2" size={16} />
             Find Healthcare Near You
           </div>
@@ -726,14 +727,9 @@ const HospitalFinder = () => {
       </div>
 
       {/* Footer with animated elements */}
-      <div className="relative z-10 bg-gradient-to-r from-teal-500 to-blue-500 text-white py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center mb-4 md:mb-0">
-            <Hospital size={24} className="mr-2" />
-            <span className="font-bold text-lg">MediSeek.ai</span>
-          </div>
-          <p className="text-teal-100 text-sm">Find the best healthcare facilities near you, anytime, anywhere.</p>
-        </div>
+      <div className="relative z-10  text-white py-3 mt-12">
+        <Footer/>
+        
       </div>
     </div>
   )
